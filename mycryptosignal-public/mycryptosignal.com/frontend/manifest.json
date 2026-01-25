@@ -1,0 +1,46 @@
+{
+  "name": "MyCryptoSignal",
+  "short_name": "MyCryptoSignal",
+  "description": "AI-powered cryptocurrency trading signals API. Free with attribution. BUY/HOLD/RISK signals for 60 tracked cryptocurrencies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0EA5E9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/logo.svg",
+      "sizes": "320x320",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["finance", "cryptocurrency", "trading", "api"],
+  "screenshots": []
+}

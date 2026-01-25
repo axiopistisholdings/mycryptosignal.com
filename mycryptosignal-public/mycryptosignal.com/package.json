@@ -1,0 +1,33 @@
+{
+  "name": "mycryptosignal-backend",
+  "version": "1.0.0",
+  "description": "AI-powered crypto signal engine on Cloudflare Workers",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "db:create": "wrangler d1 create mycryptosignal-db",
+    "db:init": "wrangler d1 execute mycryptosignal-db --file=./schema.sql",
+    "db:seed": "wrangler d1 execute mycryptosignal-db --file=./scripts/seed-coins.sql",
+    "db:query": "wrangler d1 execute mycryptosignal-db --command",
+    "kv:create": "wrangler kv:namespace create KV",
+    "health": "node scripts/health-check.js",
+    "create-api-key": "node scripts/create-api-key.js",
+    "test": "node scripts/test-coingecko.js"
+  },
+  "keywords": [
+    "crypto",
+    "trading",
+    "signals",
+    "ai",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "Axiopistis Holdings",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "wrangler": "^4.60.0"
+  }
+}

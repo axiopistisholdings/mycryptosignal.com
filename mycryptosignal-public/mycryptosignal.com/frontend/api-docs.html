@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete API documentation for MyCryptoSignal trading signals API">
+    <meta name="keywords" content="API documentation, cryptocurrency API, crypto signals API, REST API, trading signals, developer docs">
+    <meta name="robots" content="index, follow">
+    <title>API Documentation - MyCryptoSignal</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mycryptosignal.com/api-docs.html">
+    <meta property="og:title" content="API Documentation - MyCryptoSignal">
+    <meta property="og:description" content="Complete REST API reference for accessing crypto trading signals">
+    <meta property="og:image" content="https://mycryptosignal.com/assets/icons/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="MyCryptoSignal">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mycryptosignal.com/api-docs.html">
+    <meta name="twitter:title" content="API Documentation - MyCryptoSignal">
+    <meta name="twitter:description" content="Complete REST API reference for crypto trading signals">
+    <meta name="twitter:image" content="https://mycryptosignal.com/assets/icons/twitter-card.png">
+    <meta name="twitter:site" content="@mycrypto_signal">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo-text">mycryptosignal.com</a>
+            <div class="nav-links">
+                <a href="api-docs.html" class="active">API Docs</a>
+                <a href="get-access.html">Get API Key</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="docs-main">
+        <div class="container">
+            <div class="docs-layout">
+                <!-- Sidebar Navigation -->
+                <aside class="docs-sidebar">
+                    <nav class="docs-nav">
+                        <a href="#overview" class="nav-link">Overview</a>
+                        <a href="#authentication" class="nav-link">Authentication</a>
+                        <a href="#rate-limits" class="nav-link">Rate Limits</a>
+                        <a href="#endpoints" class="nav-link">Endpoints</a>
+                        <a href="#health" class="nav-link sub">Health Check</a>
+                        <a href="#coins" class="nav-link sub">List Coins</a>
+                        <a href="#market" class="nav-link sub">Market Data</a>
+                        <a href="#onchain" class="nav-link sub">On-Chain Metrics</a>
+                        <a href="#signals" class="nav-link sub">Current Signals</a>
+                        <a href="#history" class="nav-link sub">Signal History</a>
+                        <a href="#examples" class="nav-link">Code Examples</a>
+                        <a href="#errors" class="nav-link">Error Handling</a>
+                        <a href="#best-practices" class="nav-link">Best Practices</a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="docs-content">
+                    <header class="docs-header">
+                        <h1>API Documentation</h1>
+                        <p class="subtitle">Complete reference for the MyCryptoSignal API</p>
+                        <div class="api-meta">
+                            <span class="badge">Version 1.0</span>
+                            <span class="badge">REST API</span>
+                            <span class="badge">JSON</span>
+                        </div>
+                    </header>
+
+                    <!-- Overview -->
+                    <section id="overview" class="doc-section">
+                        <h2>Overview</h2>
+                        <p>MyCryptoSignal provides free AI-powered cryptocurrency trading signals. The API is free forever with attribution required. Rate limited. No guarantees on availability or timing.</p>
+                        
+                        <div class="info-box">
+                            <h4>What You Get</h4>
+                            <ul style="list-style: none; padding-left: 0;">
+                                <li><img src="assets/icons/icon.svg" style="width:16px;height:16px;vertical-align:middle;margin-right:8px;"> BUY/HOLD/RISK signals via REST API</li>
+                                <li><img src="assets/icons/icon.svg" style="width:16px;height:16px;vertical-align:middle;margin-right:8px;"> Free forever (attribution required)</li>
+                                <li><img src="assets/icons/icon.svg" style="width:16px;height:16px;vertical-align:middle;margin-right:8px;"> Rate limited for fair usage</li>
+                                <li><img src="assets/icons/icon.svg" style="width:16px;height:16px;vertical-align:middle;margin-right:8px;"> JSON responses</li>
+                            </ul>
+                        </div>
+
+                        <div class="warning-box">
+                            <h4>No Guarantees:</h4>
+                            <ul style="list-style-type: disc; padding-left: 20px;">
+                                <li>Signal availability, timing, or frequency not guaranteed</li>
+                                <li>API may be throttled or temporarily unavailable</li>
+                                <li>No SLA or uptime commitments</li>
+                                <li>Not financial advice - informational only</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>Base URL</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>https://mycryptosignal.axiopistis-systems.workers.dev</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Authentication -->
+                    <section id="authentication" class="doc-section">
+                        <h2>Authentication</h2>
+                        <p>All API requests (except <code>/api/health</code>) require an API key in the <code>X-API-Key</code> header:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>Example Request</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>curl -H "X-API-Key: mcs_your_api_key_here" \
+  https://mycryptosignal.axiopistis-systems.workers.dev/api/signals</code></pre>
+                        </div>
+
+                        <div class="warning-box">
+                            <strong><img src="assets/icons/bullseye.svg" alt="Warning" class="warning-icon" style="width: 16px; height: 16px;">Security Best Practices:</strong>
+                            <ul>
+                                <li>Never commit API keys to version control</li>
+                                <li>Use environment variables for keys</li>
+                                <li>Rotate keys periodically</li>
+                                <li>Restrict keys to specific IP addresses (Enterprise only)</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Rate Limits -->
+                    <section id="rate-limits" class="doc-section">
+                        <h2>Rate Limits</h2>
+                        <p>Rate limits apply to all API keys. Limits may change without notice.</p>
+                        
+                        <div class="info-box">
+                            <h4>Current Limits (Subject to Change):</h4>
+                            <ul>
+                                <li>Requests per minute: Rate limited</li>
+                                <li>Requests per day: Rate limited</li>
+                                <li>Limits enforced to ensure fair usage</li>
+                                <li>Violations may result in key suspension</li>
+                            </ul>
+                        </div>
+                        </table>
+
+                        <h3>Rate Limit Headers</h3>
+                        <p>Every response includes rate limit information:</p>
+                        
+                        <div class="code-block">
+                            <pre><code>X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1642684800
+X-Quota-Limit: 300000
+X-Quota-Remaining: 275432
+X-Quota-Reset: 1643673600</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Endpoints -->
+                    <section id="endpoints" class="doc-section">
+                        <h2>Endpoints</h2>
+                        
+                        <!-- Health Check -->
+                        <div id="health" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/health</span>
+                                <span class="auth-badge">No Auth</span>
+                            </div>
+                            <p>Check API availability</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "status": "ok",
+  "timestamp": 1642684800000
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- List Coins -->
+                        <div id="coins" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/coins</span>
+                                <span class="auth-badge required">Auth Required</span>
+                            </div>
+                            <p>Get the list of 60 tracked cryptocurrencies</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "coins": [
+    {
+      "id": "bitcoin",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "chain": "Bitcoin"
+    },
+    ...
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Market Data -->
+                        <div id="market" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/market</span>
+                                <span class="auth-badge required">Auth Required</span>
+                            </div>
+                            <p>Get latest market snapshots for all coins (updated every 30 minutes)</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "data": [
+    {
+      "coin_id": "bitcoin",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "price": 42500.50,
+      "market_cap": 805000000000,
+      "volume_24h": 32500000000,
+      "price_change_24h": 2.5,
+      "price_change_7d": -1.2,
+      "price_change_30d": 8.7,
+      "timestamp": 1642684800
+    },
+    ...
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- On-Chain Data -->
+                        <div id="onchain" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/onchain</span>
+                                <span class="auth-badge required">Auth Required</span>
+                            </div>
+                            <p>Get latest on-chain metrics (updated every 30 minutes)</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "data": [
+    {
+      "coin_id": "ethereum",
+      "symbol": "ETH",
+      "name": "Ethereum",
+      "transaction_count": 1250000,
+      "active_addresses": 450000,
+      "gas_used": 12500000000000,
+      "network_utilization": 0.75,
+      "timestamp": 1642684800
+    },
+    ...
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Current Signals -->
+                        <div id="signals" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/signals</span>
+                                <span class="auth-badge required">Auth Required</span>
+                            </div>
+                            <p>Get current trading signals for all coins (updated daily at 08:00 UTC)</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "signals": [
+    {
+      "coin_id": "bitcoin",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "action": "BUY",
+      "confidence": 78.5,
+      "explanation": "Strong bullish momentum with increasing on-chain activity...",
+      "signal_date": "2026-01-20",
+      "timestamp": 1642665600
+    },
+    ...
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}</code></pre>
+                            </div>
+                            <div class="info-box">
+                                <strong>Signal Actions:</strong>
+                                <ul>
+                                    <li><strong>BUY</strong> - Bullish signal, consider buying</li>
+                                    <li><strong>HOLD</strong> - Neutral, maintain current position</li>
+                                    <li><strong>RISK</strong> - Bearish signal, consider selling/avoiding</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Signal History -->
+                        <div id="history" class="endpoint-card">
+                            <div class="endpoint-header">
+                                <span class="method get">GET</span>
+                                <span class="path">/api/signals/history</span>
+                                <span class="auth-badge required">Auth Required</span>
+                            </div>
+                            <p>Get signal history for a specific coin (up to 365 days)</p>
+                            <h4>Query Parameters</h4>
+                            <ul>
+                                <li><code>coin_id</code> (required) - Coin identifier (e.g., "bitcoin")</li>
+                                <li><code>days</code> (optional) - Number of days (default: 30, max: 365)</li>
+                            </ul>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Example Request</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>curl -H "X-API-Key: YOUR_KEY" \
+  "https://mycryptosignal.axiopistis-systems.workers.dev/api/signals/history?coin_id=bitcoin&days=30"</code></pre>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Response</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code>{
+  "coin_id": "bitcoin",
+  "history": [
+    {
+      "coin_id": "bitcoin",
+      "action": "BUY",
+      "confidence": 78.5,
+      "explanation": "Strong bullish momentum...",
+      "signal_date": "2026-01-20",
+      "timestamp": 1642665600
+    },
+    ...
+  ],
+  "count": 30,
+  "attribution": "Data provided by MyCryptoSignal"
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Code Examples -->
+                    <section id="examples" class="doc-section">
+                        <h2>Code Examples</h2>
+                        
+                        <h3>JavaScript / Node.js</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>Fetch API</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>const API_KEY = 'mcs_your_api_key_here';
+const BASE_URL = 'https://mycryptosignal.axiopistis-systems.workers.dev';
+
+async function getSignals() {
+  const response = await fetch(`${BASE_URL}/api/signals`, {
+    headers: {
+      'X-API-Key': API_KEY
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+  
+  const signals = await response.json();
+  console.log('Signals:', signals);
+  return signals;
+}
+
+getSignals();</code></pre>
+                        </div>
+
+                        <h3>Python</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>requests library</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>import requests
+
+API_KEY = 'mcs_your_api_key_here'
+BASE_URL = 'https://mycryptosignal.axiopistis-systems.workers.dev'
+
+def get_signals():
+    headers = {'X-API-Key': API_KEY}
+    response = requests.get(f'{BASE_URL}/api/signals', headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+signals = get_signals()
+print(f"Total signals: {len(signals)}")</code></pre>
+                        </div>
+
+                        <h3>cURL</h3>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span>Command Line</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Get current signals
+curl -H "X-API-Key: mcs_your_api_key_here" \
+  https://mycryptosignal.axiopistis-systems.workers.dev/api/signals
+
+# Get history for Bitcoin
+curl -H "X-API-Key: mcs_your_api_key_here" \
+  "https://mycryptosignal.axiopistis-systems.workers.dev/api/signals/history?coin_id=bitcoin&days=7"</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Error Handling -->
+                    <section id="errors" class="doc-section">
+                        <h2>Error Handling</h2>
+                        <p>All errors return appropriate HTTP status codes and JSON error messages:</p>
+                        
+                        <div class="endpoint-card">
+                            <h3>401 Unauthorized</h3>
+                            <p>Invalid or missing API key</p>
+                            <div class="code-block">
+                                <pre><code>{
+  "error": "Invalid or missing API key"
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <h3>429 Too Many Requests</h3>
+                            <p>Rate limit exceeded</p>
+                            <div class="code-block">
+                                <pre><code>{
+  "error": "Rate limit exceeded: 60 requests per minute. Retry after 42s"
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <h3>500 Internal Server Error</h3>
+                            <p>Server error (rare, contact support if persistent)</p>
+                            <div class="code-block">
+                                <pre><code>{
+  "error": "Internal server error"
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Best Practices -->
+                    <section id="best-practices" class="doc-section">
+                        <h2>Best Practices</h2>
+                        
+                        <div class="info-box">
+                            <h4>Caching Strategy</h4>
+                            <ul>
+                                <li><strong>Coins:</strong> Cache for 24 hours (static data)</li>
+                                <li><strong>Market/On-Chain:</strong> Cache for 30 minutes (update frequency)</li>
+                                <li><strong>Signals:</strong> Cache for 23 hours (updates daily at 08:00 UTC)</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-box">
+                            <h4>Rate Limit Management</h4>
+                            <ul>
+                                <li>Monitor rate limit headers in responses</li>
+                                <li>Implement exponential backoff for 429 errors</li>
+                                <li>Batch requests when possible</li>
+                                <li>Use webhooks when available (coming soon)</li>
+                            </ul>
+                        </div>
+
+                        <div class="warning-box">
+                            <h4>Legal Disclaimer</h4>
+                            <p><img src="assets/icons/bullseye.svg" alt="Warning" class="warning-icon"><strong>IMPORTANT:</strong> MyCryptoSignal provides informational data only. Signals are NOT financial advice. Trading cryptocurrencies carries significant risk. Always do your own research and consult with qualified financial advisors before making investment decisions. Past performance does not guarantee future results.</p>
+                        </div>
+                    </section>
+
+                    <!-- Get Started CTA -->
+                    <section class="cta-section">
+                        <div class="cta-card">
+                            <h2>Ready to Get Started?</h2>
+                            <p>Join our Beta Partner Program for free API access</p>
+                            <a href="get-access.html" class="btn-primary">Get API Key</a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-layout">
+                <div class="footer-logo-section">
+                    <img src="assets/icons/logo.svg" alt="MyCryptoSignal Logo" class="footer-brand-logo">
+                </div>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="api-docs.html">API Documentation</a></li>
+                            <li><a href="get-access.html">Get API Key</a></li>
+                            <li><a href="https://x.com/mycrypto_signal" target="_blank">Live Feed</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="https://github.com/axiopistisholdings/mycryptosignal" target="_blank">GitHub</a></li>
+                            <li><a href="https://mycryptosignal.axiopistis-systems.workers.dev/api/health" target="_blank">Status</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                            <li><a href="terms-of-service.html">Terms of Service</a></li>
+                            <li><a href="disclaimer.html">Disclaimer</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Connect</h4>
+                        <div class="social-icons">
+                            <a href="https://x.com/mycrypto_signal" target="_blank" rel="noopener noreferrer" title="X/Twitter">
+                                <img src="assets/icons/x-logo.svg" alt="X/Twitter" class="social-icon">
+                            </a>
+                            <a href="https://github.com/axiopistisholdings/mycryptosignal" target="_blank" rel="noopener noreferrer" title="GitHub">
+                                <img src="assets/icons/github-mark.svg" alt="GitHub" class="social-icon">
+                            </a>
+                            <a href="mailto:support@mycryptosignal.com" title="Email Support">
+                                <img src="assets/icons/email.svg" alt="Email" class="social-icon">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-disclaimer">
+                <p><img src="assets/icons/bullseye.svg" alt="Warning" class="warning-icon"><strong>IMPORTANT DISCLAIMER:</strong> MyCryptoSignal provides informational data only. Signals are NOT financial advice. Trading cryptocurrencies carries significant risk. Always do your own research and consult with qualified financial advisors before making investment decisions. Past performance does not guarantee future results.</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Axiopistis Holdings LC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        // Smooth scroll for sidebar links
+        document.querySelectorAll('.docs-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Update active link
+                document.querySelectorAll('.docs-nav a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        // Highlight active section on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    document.querySelectorAll('.docs-nav a').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.doc-section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
