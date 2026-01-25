@@ -4,7 +4,7 @@
 
 MyCryptoSignal is a professional-grade cryptocurrency trading signals platform that leverages AI to analyze market data and generate actionable trading insights. Built on Cloudflare Workers for global edge deployment with minimal latency.
 
-## 🌟 Features
+## Features
 
 - **Real-time Signal Generation**: AI-enhanced trading signals updated hourly
 - **Multi-Source Data Aggregation**: Integrates CoinGecko, Alchemy, and Infura APIs
@@ -15,7 +15,7 @@ MyCryptoSignal is a professional-grade cryptocurrency trading signals platform t
 - **Edge Computing**: Deployed on Cloudflare Workers for global performance
 - **Persistent Storage**: Cloudflare D1 (SQLite) + KV for data and caching
 
-## 🏗️ Architecture
+## Architecture
 
 ### Backend (Cloudflare Worker)
 - **Runtime**: Cloudflare Workers (V8 isolates)
@@ -38,7 +38,7 @@ MyCryptoSignal is a professional-grade cryptocurrency trading signals platform t
 - **X (Twitter)**: Automated signal posting via Twitter API v2
 - **Resend**: Transactional email notifications
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -126,7 +126,7 @@ npm run deploy
 # https://mycryptosignal.YOUR-SUBDOMAIN.workers.dev
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 mycryptosignal/
@@ -166,7 +166,7 @@ mycryptosignal/
 └── package.json         # Node.js dependencies
 ```
 
-## 🔑 API Documentation
+## API Documentation
 
 Full API documentation is available at:
 - **Web**: https://mycryptosignal.com/api-docs
@@ -186,7 +186,7 @@ curl -H "X-API-Key: your_api_key" \
   https://mycryptosignal.YOUR-SUBDOMAIN.workers.dev/api/coins/bitcoin
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 - **Primary Cyan**: `#0EA5E9` - Buttons, links, accents
@@ -203,7 +203,7 @@ curl -H "X-API-Key: your_api_key" \
 - Apple touch icons: 76x76, 120x120, 152x152, 180x180
 - Social cards: 1200x630 (OG image, Twitter card)
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please:
 
@@ -213,21 +213,21 @@ Contributions are welcome! Please:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🔗 Links
+## Links
 
 - **Website**: https://mycryptosignal.com
 - **API Docs**: https://mycryptosignal.com/api-docs
 - **GitHub**: https://github.com/axiopistisholdings/mycryptosignal
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This platform provides trading signals for informational purposes only. Cryptocurrency trading carries significant risk. Always do your own research and never invest more than you can afford to lose.
 
-## 📧 Contact
+## Contact
 
 For questions, support, or API access inquiries:
 - **Email**: support@mycryptosignal.com
@@ -235,4 +235,4 @@ For questions, support, or API access inquiries:
 
 ---
 
-**Built with ❤️ by Axiopistis Systems**
+**Built by Axiopistis Holdings LC**

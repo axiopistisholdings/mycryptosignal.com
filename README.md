@@ -1,198 +1,142 @@
-# MyCryptoSignal.com 🚀
+<div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)](https://workers.cloudflare.com/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)](https://www.javascript.com/)
+<img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/logo.svg" alt="MyCryptoSignal Logo" width="200"/>
 
-AI-powered cryptocurrency trading signals API delivering real-time market insights and trading recommendations. Built on Cloudflare Workers for global edge performance.
+# MyCryptoSignal
 
-## 🌟 Features
+**AI-Powered Cryptocurrency Trading Signals**
 
-- **AI-Driven Signal Generation** - Advanced algorithms analyze market trends, sentiment, and technical indicators
-- **Real-time Market Data** - Live cryptocurrency price feeds and market metrics
-- **RESTful API** - Easy integration with trading bots, dashboards, and applications
-- **Edge Performance** - Deployed on Cloudflare Workers for sub-50ms global latency
-- **Open Source Core** - Transparent signal engine for community auditing and contributions
-- **Multi-Asset Support** - Signals for Bitcoin, Ethereum, and major altcoins
-- **Risk Management** - Built-in position sizing and risk/reward analysis
+[![Live Platform](https://img.shields.io/badge/Live-mycryptosignal.com-0EA5E9?style=for-the-badge)](https://mycryptosignal.com)
+[![API Documentation](https://img.shields.io/badge/API-Documentation-50C878?style=for-the-badge)](https://mycryptosignal.com/api-docs)
+[![Get Access](https://img.shields.io/badge/Get-API_Access-0EA5E9?style=for-the-badge)](https://mycryptosignal.com/get-access)
 
-## 🏗️ Architecture
+[Live Demo](https://mycryptosignal.com) • [API Docs](https://mycryptosignal.com/api-docs) • [Get Access](https://mycryptosignal.com/get-access)
 
-```
-┌─────────────────┐
-│  Client Apps    │
-│ (Web/Mobile/Bot)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Cloudflare      │
-│ Workers API     │
-└────────┬────────┘
-         │
-    ┌────┴─────┬──────────┬─────────────┐
-    ▼          ▼          ▼             ▼
-┌────────┐ ┌───────┐ ┌─────────┐ ┌──────────┐
-│ Signal │ │ Market│ │ AI/ML   │ │ Database │
-│ Engine │ │ Data  │ │ Models  │ │ (D1/KV)  │
-└────────┘ └───────┘ └─────────┘ └──────────┘
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- Cloudflare account (for deployment)
-- Wrangler CLI (`npm install -g wrangler`)
-
-### Local Development
-
-```bash
-# Clone the repository
-git clone https://github.com/axiopistisholdings/mycryptosignal.com.git
-cd mycryptosignal.com
-
-# Install dependencies
-npm install
-
-# Configure environment variables
-cp .env.example .env
-# Edit .env with your API keys
-
-# Start development server
-npm run dev
-```
-
-### Deployment
-
-```bash
-# Login to Cloudflare
-wrangler login
-
-# Deploy to production
-npm run deploy
-```
-
-## 📖 API Documentation
-
-### Authentication
-
-All API requests require an API key in the header:
-
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  https://api.mycryptosignal.com/v1/signals
-```
-
-### Endpoints
-
-#### Get Latest Signals
-
-```http
-GET /v1/signals?symbol=BTC&timeframe=4h
-```
-
-**Response:**
-```json
-{
-  "signal": {
-    "symbol": "BTC/USDT",
-    "action": "BUY",
-    "confidence": 0.85,
-    "entry_price": 42500,
-    "stop_loss": 41200,
-    "take_profit": [44000, 45500, 47000],
-    "risk_reward": 3.2,
-    "timestamp": "2026-01-25T12:00:00Z"
-  }
-}
-```
-
-#### Get Market Analysis
-
-```http
-GET /v1/analysis?symbol=ETH
-```
-
-#### Subscribe to Webhook Notifications
-
-```http
-POST /v1/webhooks
-Content-Type: application/json
-
-{
-  "url": "https://your-app.com/webhook",
-  "events": ["signal_generated", "market_alert"]
-}
-```
-
-Full API documentation available at [docs.mycryptosignal.com](https://docs.mycryptosignal.com)
-
-## 🛠️ Technology Stack
-
-- **Runtime:** Cloudflare Workers (V8 isolates)
-- **Language:** JavaScript (ES6+)
-- **Database:** Cloudflare D1 (SQLite) + KV Storage
-- **APIs:** CoinGecko, Binance, TradingView
-- **AI/ML:** TensorFlow.js for edge inference
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 🔒 Security
-
-Security is paramount for financial applications. Please review our [Security Policy](SECURITY.md) for:
-- Vulnerability reporting procedures
-- Supported versions
-- Security best practices
-
-**Never commit API keys, secrets, or private keys to this repository.**
-
-## 📊 Roadmap
-
-- [ ] Multi-exchange support (Kraken, Coinbase, Crypto.com)
-- [ ] Advanced sentiment analysis from social media
-- [ ] Portfolio tracking and performance analytics
-- [ ] Mobile app (iOS/Android)
-- [ ] Premium tier with enhanced AI models
-- [ ] Copy trading functionality
-- [ ] Multi-language support
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Market data provided by CoinGecko and Binance APIs
-- Technical indicators powered by TA-Lib
-- Infrastructure by Cloudflare Workers
-- Community contributors and testers
-
-## 📞 Support
-
-- **Documentation:** [docs.mycryptosignal.com](https://docs.mycryptosignal.com)
-- **Issues:** [GitHub Issues](https://github.com/axiopistisholdings/mycryptosignal.com/issues)
-- **Discord:** [Join our community](https://discord.gg/mycryptosignal)
-- **Email:** support@mycryptosignal.com
-
-## ⚠️ Disclaimer
-
-This software is for educational and informational purposes only. Cryptocurrency trading carries substantial risk of loss. Never invest more than you can afford to lose. Always conduct your own research and consult with financial advisors before making trading decisions.
+</div>
 
 ---
 
-**Built with ❤️ by [Axiopistis Holdings](https://github.com/axiopistisholdings)**
+## About
 
-*Empowering traders with AI-driven insights*
+MyCryptoSignal is a professional-grade cryptocurrency trading signals platform that leverages artificial intelligence to analyze market data and generate actionable trading insights. Our platform delivers real-time signals with global low-latency access powered by edge computing.
+
+## Key Features
+
+<div align="center">
+
+| <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/ai.svg" width="48"/><br/>**AI-Enhanced Signals** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/bolt.svg" width="48"/><br/>**Real-Time Data** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/chain-and-locked-padlock.svg" width="48"/><br/>**Secure API** |
+|:---:|:---:|:---:|
+| Advanced algorithms analyze market patterns | Updated hourly with fresh insights | Enterprise-grade authentication |
+
+| <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/magnifying-glass-data.svg" width="48"/><br/>**Multi-Source Data** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/bullseye.svg" width="48"/><br/>**Precision Targeting** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/signal.svg" width="48"/><br/>**Signal Delivery** |
+|:---:|:---:|:---:|
+| CoinGecko, Alchemy, Infura integration | Focus on high-potential opportunities | API, Web, and Social Media |
+
+</div>
+
+## How It Works
+
+1. **Data Collection** - We aggregate market data from multiple trusted sources
+2. **AI Analysis** - Our algorithms identify patterns and trading opportunities
+3. **Signal Generation** - Actionable signals are created with confidence scores
+4. **Delivery** - Signals delivered via API, web dashboard, and social media
+
+## API Access
+
+Get programmatic access to our trading signals:
+
+```bash
+curl -H "X-API-Key: your_api_key" \
+  https://api.mycryptosignal.com/api/signals
+```
+
+**API Features:**
+- RESTful API with JSON responses
+- Rate limiting and usage tracking
+- Comprehensive documentation
+- Multiple endpoints for coins, signals, and market data
+
+[View Full API Documentation](https://mycryptosignal.com/api-docs) | [Request API Key](https://mycryptosignal.com/get-access)
+
+## Technology Stack
+
+<div align="center">
+
+| Layer | Technology |
+|:------|:-----------|
+| **Edge Computing** | Cloudflare Workers |
+| **Database** | Cloudflare D1 (SQLite) |
+| **Caching** | Cloudflare KV |
+| **Data Sources** | CoinGecko, Alchemy, Infura |
+| **AI/ML** | Custom algorithms |
+| **Frontend** | Modern HTML/CSS/JavaScript |
+
+</div>
+
+## Supported Cryptocurrencies
+
+Bitcoin (BTC), Ethereum (ETH), Cardano (ADA), Solana (SOL), Polkadot (DOT), Avalanche (AVAX), Chainlink (LINK), Polygon (MATIC), Uniswap (UNI), Litecoin (LTC), and more.
+
+[View All Supported Coins](https://mycryptosignal.com/api/coins)
+
+## Getting Started
+
+### For Users
+
+1. Visit [mycryptosignal.com](https://mycryptosignal.com)
+2. Browse current signals on the dashboard
+3. Sign up for API access if needed
+4. Start making informed trading decisions
+
+### For Developers
+
+1. [Request an API key](https://mycryptosignal.com/get-access)
+2. Review the [API documentation](https://mycryptosignal.com/api-docs)
+3. Integrate signals into your trading bot or application
+4. Monitor usage via your dashboard
+
+## Use Cases
+
+- **Automated Trading Bots** - Integrate signals into your trading algorithms
+- **Portfolio Management** - Make data-driven investment decisions
+- **Market Research** - Analyze trends and opportunities
+- **Educational Tools** - Learn about market dynamics and patterns
+
+## Community
+
+We value transparency and community engagement:
+
+- **Open Platform** - Explore our frontend code and documentation
+- **Security First** - Review our [Security Policy](SECURITY.md) for responsible disclosure
+- **Code of Conduct** - Read our [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## Support
+
+Need help or have questions?
+
+<div align="center">
+
+[📧 Email Support](mailto:support@mycryptosignal.com) • [📚 Documentation](https://mycryptosignal.com/api-docs) • [🌐 Website](https://mycryptosignal.com)
+
+</div>
+
+## Disclaimer
+
+⚠️ **Risk Warning**: Cryptocurrency trading carries significant risk. Our signals are for informational purposes only and should not be considered financial advice. Always conduct your own research and never invest more than you can afford to lose.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Built by [Axiopistis Holdings LC](https://axiopistisholdings.com)**
+
+⭐ Star us on GitHub • 🔗 Share with your network
+
+[![GitHub stars](https://img.shields.io/github/stars/axiopistisholdings/mycryptosignal.com?style=social)](https://github.com/axiopistisholdings/mycryptosignal.com)
+[![GitHub forks](https://img.shields.io/github/forks/axiopistisholdings/mycryptosignal.com?style=social)](https://github.com/axiopistisholdings/mycryptosignal.com/fork)
+
+</div>
