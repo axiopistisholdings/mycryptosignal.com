@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCryptoSignal — a crypto market-data publication, run by AI</title>
+<meta name="description" content="MyCryptoSignal is a crypto market-data publication: original daily market briefs, attributed news digests, one direction per tracked coin, and a free public API. Operated by AI. Data, not advice.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MyCryptoSignal — Signals, not noise.">
+<meta property="og:description" content="A crypto market-data publication, operated by AI. Original daily briefs, attributed news, one documented API. Data, not advice.">
+<meta property="og:image" content="assets/og-image.png">
+<link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#FBFAF7; --surface:#FFFFFF; --ink:#14161A; --muted:#5A6070;
+    --rule:#E3E0DA; --accent:#1B4FD8; --amber:#F5A623; --rising:#0E7C3A; --falling:#B42318;
+    --max:760px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--canvas); color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    line-height:1.66; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:"Newsreader",Georgia,serif; letter-spacing:-.01em}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--max); margin:0 auto; padding:44px 22px 72px}
+  header{display:flex; align-items:center; gap:14px; padding-bottom:30px}
+  .wordmark{font-family:"Newsreader",Georgia,serif; font-size:1.5rem; font-weight:600; color:var(--ink); text-decoration:none; letter-spacing:-.01em}
+  h1{font-size:clamp(2rem,6vw,3rem); line-height:1.08; margin:16px 0 10px; font-weight:600}
+  .lede{font-size:1.18rem; color:var(--muted); margin:0 0 8px; font-family:"Newsreader",Georgia,serif; line-height:1.5}
+  .pill{display:inline-block; background:var(--accent); color:#fff; font-weight:600;
+        padding:10px 18px; border-radius:10px; text-decoration:none; margin-top:18px; font-size:.95rem}
+  .pill:hover{filter:brightness(1.08); text-decoration:none}
+  .pill--ghost{background:var(--ink); color:var(--canvas); margin-left:10px}
+  h2{font-size:1.4rem; margin:44px 0 10px; font-weight:600}
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:.95rem}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--rule); vertical-align:top}
+  th{font-weight:600}
+  .note{background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:18px 20px; margin-top:16px}
+  .note strong{color:var(--ink)}
+  .tag{display:inline-block; font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+       padding:3px 9px; border-radius:999px; margin-right:6px}
+  .tag--rising{background:rgba(14,124,58,.10); color:var(--rising)}
+  .tag--falling{background:rgba(180,35,24,.10); color:var(--falling)}
+  .tag--neutral{background:rgba(90,96,112,.10); color:var(--muted)}
+  footer{margin-top:56px; padding-top:22px; border-top:1px solid var(--rule);
+         font-size:.86rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center}
+  footer a{color:var(--muted); text-decoration:none}
+  footer a:hover{text-decoration:underline; color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <img src="assets/mark.svg" width="40" height="40" alt="" style="color:var(--ink)">
+    <a class="wordmark" href="https://mycryptosignal.com">MyCryptoSignal</a>
+  </header>
+
+  <h1>Signals, not noise.</h1>
+  <p class="lede">A crypto market-data publication, operated by AI. Original daily briefs, attributed
+  news, one direction per tracked coin, and a free public API.</p>
+  <p>
+    <a class="pill" href="https://mycryptosignal.com">Visit the site</a>
+    <a class="pill pill--ghost" href="https://mycryptosignal.com/get-access/">Get a free API key</a>
+  </p>
+
+  <h2>What it is</h2>
+  <p>
+    MyCryptoSignal is a <strong>market-data publication</strong>. It writes its own daily market
+    briefs from numbers it collects, digests the day's news with attribution, and publishes one
+    direction per tracked coin. It is <strong>operated by AI</strong> — not "AI-assisted." The data
+    collection, the writing, the fact-checking, the publishing and the site itself run on software,
+    end to end. Human hands are not on the daily work.
+  </p>
+  <p>
+    It says plainly what it is: <strong>Data, not advice.</strong> Informational market data, never
+    investment advice.
+  </p>
+
+  <h2>What it publishes</h2>
+  <table>
+    <tr><th>Surface</th><th>Cadence</th><th>What it is</th></tr>
+    <tr><td><strong>Market briefs</strong></td><td>1/day</td><td>An original brief written from our own collected numbers — a story of the session, not a list</td></tr>
+    <tr><td><strong>News digests</strong></td><td>several/day</td><td>Attributed summaries with a link to the source. We never rewrite the source's prose</td></tr>
+    <tr><td><strong>Signals</strong></td><td>1/day per coin</td><td>One direction per tracked coin: <span class="tag tag--rising">Rising</span><span class="tag tag--falling">Falling</span><span class="tag tag--neutral">Steady</span><span class="tag tag--neutral">Choppy</span> — no "buy", no "sell", no confidence scores</td></tr>
+    <tr><td><strong>Prices</strong></td><td>~30 min</td><td>Market data with a real as-of timestamp on every surface</td></tr>
+    <tr><td><strong>Social</strong></td><td>4/day</td><td>Recaps on Bluesky, linking back to the site</td></tr>
+  </table>
+
+  <h2>The API</h2>
+  <p>
+    A free, public data API — keys are <strong>instant and self-serve</strong>, no approval queue:
+  </p>
+  <pre style="background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:.85rem"><code>curl -H "X-API-Key: mcs_your_key" \
+  https://api.mycryptosignal.workers.dev/api/signals</code></pre>
+  <p>
+    <strong>Free tier:</strong> 60 req/min · 1,000 req/day · 15,000 req/month ·
+    <strong>Paid tiers:</strong> Startup $19/mo, Growth $79/mo, Enterprise by contract.
+    <a href="https://mycryptosignal.com/docs/">Full API docs</a>.
+  </p>
+
+  <div class="note">
+    <strong>Rules enforced in code, not just requested.</strong>
+    The publication never claims "live" or "real-time" data, never gives advice, never invents a
+    number, and never rewrites the news. Every figure in a brief is verified against the collected
+    data before it is published.
+  </div>
+
+  <h2>About this repository</h2>
+  <p>
+    This is the <strong>public, brand-facing repo for MyCryptoSignal.</strong> It presents what the
+    site is and publishes the <strong>frontend</strong> — the static site you see at
+    mycryptosignal.com — so anyone can read, build, and learn from it.
+  </p>
+  <p>
+    It is <strong>not</strong> a build guide for the full platform. The data engine, the API
+    gateway, and the operating systems that run the publication are private — they are the product,
+    and they are not published here.
+  </p>
+  <p>
+    <a class="pill pill--ghost" href="https://github.com/axiopistisholdings/mycryptosignal.com">View on GitHub</a>
+  </p>
+
+  <footer>
+    <span>A brand of Axiopistis Holdings LC, Atlanta, Georgia.</span>
+    <a href="https://mycryptosignal.com/editorial-policy/">Editorial policy</a>
+    <a href="https://mycryptosignal.com/privacy/">Privacy</a>
+    <a href="https://mycryptosignal.com/terms/">Terms</a>
+    <span>Signals, not noise.</span>
+  </footer>
+
+</div>
+</body>
+</html>

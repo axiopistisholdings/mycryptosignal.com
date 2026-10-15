@@ -1,0 +1,76 @@
+---
+import { NAV, SITE } from '../lib/site';
+import Brand from './Brand.astro';
+
+const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
+function isActive(href: string): boolean {
+  if (href === '/') return current === '/';
+  return current === href || current.startsWith(`${href}/`);
+}
+---
+
+<nav class="navbar" aria-label="Primary">
+  <div class="container">
+    <a href="/" class="brand" aria-label={`${SITE.name} home`}>
+      <Brand height={26} />
+    </a>
+    <div class="nav-links">
+      {NAV.map((item) => (
+        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a>
+      ))}
+      <button class="cmdk-open" type="button" data-cmdk-open aria-keyshortcuts="Meta+K Control+K" aria-label="Search coins and pages (Command or Control K)">
+        <span aria-hidden="true">Search</span><kbd aria-hidden="true">⌘K</kbd>
+      </button>
+      <a href="/get-access" class="nav-cta">Get API Key</a>
+      <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme">
+        <span class="icon-dark" aria-hidden="true">☾</span>
+        <span class="icon-light" aria-hidden="true">☀</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Persist the user's explicit theme choice; it overrides prefers-color-scheme.
+  // The toggle also announces its state: aria-pressed = dark-on, and the label
+  // names the action the visitor is about to take.
+  (function () {
+    const root = document.documentElement;
+    const hasExplicitChoice = () => {
+      try {
+        return localStorage.getItem('mcs-theme') === 'light' || localStorage.getItem('mcs-theme') === 'dark';
+      } catch {
+        return false;
+      }
+    };
+    const effective = () =>
+      root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    function sync(btn: HTMLButtonElement) {
+      const dark = effective() === 'dark';
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-toggle');
+    buttons.forEach((btn) => {
+      sync(btn);
+      btn.addEventListener('click', () => {
+        const next = effective() === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try {
+          localStorage.setItem('mcs-theme', next);
+        } catch {
+          /* storage unavailable (private mode) — the session still toggles */
+        }
+        buttons.forEach(sync);
+      });
+    });
+
+    // Keep the announced state in sync with the OS while no explicit choice exists.
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (!hasExplicitChoice()) buttons.forEach(sync);
+    });
+  })();
+</script>

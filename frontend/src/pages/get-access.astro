@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+---
+
+<Base
+  title="Get API Access"
+  description="Request a free MyCryptoSignal API key. Free with attribution, rate limited, no card required."
+  path="/get-access"
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Free API access</p>
+      <h1>Get API access</h1>
+      <p class="lede muted">Free with attribution · rate limited · no card required.</p>
+
+      <h2>Terms of use</h2>
+      <p>By requesting a key you agree to:</p>
+      <ul>
+        <li>Display “Powered by <a href="/">MyCryptoSignal</a>” attribution, linked to mycryptosignal.com.</li>
+        <li>Respect the documented rate limits (violations may suspend a key).</li>
+        <li>Not resell, redistribute, or commercialize the data without a paid agreement.</li>
+        <li>Understand signals and data are informational only — <strong>not financial advice</strong>.</li>
+      </ul>
+
+      <h2>Get your key</h2>
+      <p>
+        Free, self-serve, and instant. Submit the form and your key is returned immediately — it is shown
+        <strong>once</strong>, so copy it somewhere safe now. We keep only its SHA-256 hash, never the key
+        itself. The free tier is rate limited; see the <a href="/api">limits</a> and the
+        <a href="/docs">API reference</a>.
+      </p>
+
+      <form id="access-form" novalidate>
+        <div class="form-group">
+          <label for="email">Email address *</label>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="project">Project / company *</label>
+          <input type="text" id="project" name="project" required placeholder="Your project or company name" />
+        </div>
+        <div class="form-group">
+          <label for="use_case">Use case * <span class="hint">(one line — what are you building?)</span></label>
+          <textarea id="use_case" name="use_case" rows="4" required placeholder="e.g., portfolio tracker, trading dashboard, research tool, Discord bot"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="website">Website / GitHub <span class="hint">(optional)</span></label>
+          <input type="url" id="website" name="website" placeholder="https://…" />
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="agree" name="agree" required />
+            <span>I agree to display attribution and respect the terms above. *</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn">Get my free API key</button>
+      </form>
+
+      <div id="form-status" class="form-status hidden" role="status" aria-live="polite"></div>
+
+      <h2>Attribution examples</h2>
+      <h3>Text link (minimum)</h3>
+      <pre><code>{`Powered by <a href="https://mycryptosignal.com">MyCryptoSignal</a>`}</code></pre>
+      <h3>Footer badge (recommended)</h3>
+      <pre><code>{`<div style="text-align:center;padding:10px">
+  <a href="https://mycryptosignal.com" style="color:#50C878">Powered by MyCryptoSignal</a>
+</div>`}</code></pre>
+
+      <p class="attribution mt-5">
+        Questions? <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // The public API base for the BROWSER. This must be the advertised public host
+  // (the Worker gateway), not the build-time PUBLIC_API_BASE — the latter is
+  // http://127.0.0.1:8080 inside the engine container (used only for the static
+  // build) and would be meaningless in a visitor's browser.
+  import { SITE } from '../lib/site';
+  const API_BASE = SITE.apiBase.replace(/\/+$/, '');
+
+  const form = document.getElementById('access-form') as HTMLFormElement | null;
+  const status = document.getElementById('form-status');
+  const submit = document.getElementById('submit-btn') as HTMLButtonElement | null;
+
+  function show(kind: 'ok' | 'err', html: string) {
+    if (!status) return;
+    status.className = `form-status ${kind}`;
+    status.innerHTML = html;
+    status.classList.remove('hidden');
+  }
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const payload = {
+      email: String(fd.get('email') || '').trim(),
+      project: String(fd.get('project') || '').trim(),
+      use_case: String(fd.get('use_case') || '').trim(),
+      website: String(fd.get('website') || '').trim() || null,
+      agree: fd.get('agree') === 'on',
+    };
+
+    if (!payload.email || !payload.project || !payload.use_case || !payload.agree) {
+      show('err', 'Please complete all required fields and accept the terms.');
+      return;
+    }
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = 'Submitting…';
+    }
+
+    // POST to the real public API (our engine's /api/request-key, via the Worker
+    // gateway). The engine issues a free key immediately and returns it once.
+    try {
+      const res = await fetch(`${API_BASE}/api/request-key`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          api_key?: string;
+          limits?: { requests_per_minute?: number; requests_per_day?: number; monthly_quota?: number };
+        } | null;
+        if (data?.api_key) {
+          const key = data.api_key;
+          const lim = data.limits ?? {};
+          form.classList.add('hidden');
+          show(
+            'ok',
+            '<strong>Your API key</strong> — copy it now; it is shown only once:' +
+              `<pre><code id="issued-key">${escapeHtml(key)}</code></pre>` +
+              `<p>Send it as the <code>X-API-Key</code> header. Free tier: ${lim.requests_per_minute ?? 60} requests/min · ${lim.requests_per_day ?? 1000}/day · ${lim.monthly_quota ?? 15000}/month. ` +
+              'See the <a href="/docs/">API reference</a>.</p>' +
+              '<button type="button" class="btn btn-ghost" id="copy-key">Copy key</button>',
+          );
+          const copyBtn = document.getElementById('copy-key');
+          copyBtn?.addEventListener('click', () => {
+            navigator.clipboard?.writeText(key).then(
+              () => {
+                copyBtn.textContent = 'Copied';
+              },
+              () => {
+                copyBtn.textContent = 'Select and copy the key above';
+              },
+            );
+          });
+        } else {
+          show('err', 'Your key was issued, but the response could not be read. Please contact support@mycryptosignal.com.');
+        }
+        return;
+      }
+
+      if (res.status === 404 || res.status === 501) {
+        show(
+          'ok',
+          "We couldn't reach the key-request service just now. " +
+            `Please contact <a href="mailto:${'support@mycryptosignal.com'}">support@mycryptosignal.com</a>.`,
+        );
+        return;
+      }
+
+      let message = 'We could not submit your request. Please try again.';
+      try {
+        const body = (await res.json()) as { error?: string };
+        if (body?.error) message = body.error;
+      } catch {
+        /* non-JSON error body */
+      }
+      show('err', message);
+    } catch {
+      show('err', 'Network error. Check your connection and try again.');
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = 'Get my free API key';
+      }
+    }
+  });
+</script>

@@ -1,119 +1,46 @@
 # Security Policy
 
-## Supported Versions
-
-We release security updates for the following versions:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-| < 1.0   | :x:                |
-
 ## Reporting a Vulnerability
 
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 
-Instead, please report security vulnerabilities to:
+Report security vulnerabilities privately to **security@mycryptosignal.com**.
 
-**Email:** security@mycryptosignal.com
-
-### What to Include
-
-When reporting a vulnerability, please include:
+### What to include
 
 1. **Description** of the vulnerability
-2. **Steps to reproduce** the issue
-3. **Potential impact** (data exposure, financial risk, etc.)
+2. **Steps to reproduce**
+3. **Potential impact** (data exposure, service disruption, etc.)
 4. **Suggested fix** (if available)
-5. **Your contact information** for follow-up
 
-### Response Timeline
+### Response timeline
 
-- **Initial Response:** Within 48 hours
-- **Status Update:** Within 7 days
-- **Resolution Target:** Within 30 days for critical issues
+- **Initial response:** within 48 hours
+- **Status update:** within 7 days
+- **Resolution target:** within 30 days for critical issues
 
-### Disclosure Policy
+We follow coordinated disclosure: you report privately, we acknowledge and investigate, we
+develop and test a fix, we release it, and we disclose the details after users have had time to
+update.
 
-We follow coordinated disclosure:
+## Scope
 
-1. You report the vulnerability privately
-2. We acknowledge and investigate
-3. We develop and test a fix
-4. We release a security patch
-5. We publicly disclose the vulnerability details (after users have had time to update)
+This repository contains the **public frontend** of mycryptosignal.com — a static site that reads
+the public API at build time. It contains no secrets and no server-side code.
 
-## Security Best Practices
+The data engine, the API gateway, and the operating systems behind the publication are **private**
+and are not published here. Vulnerabilities in the operated service (the public API at
+api.mycryptosignal.workers.dev) should still be reported to security@mycryptosignal.com.
 
-### For Contributors
+## Security practices
 
-- **Never commit secrets** (API keys, tokens, passwords)
-- **Use environment variables** for sensitive configuration
-- **Validate all inputs** from external sources
-- **Follow OWASP guidelines** for web security
-- **Keep dependencies updated** regularly
-
-### For Users
-
-- **Keep your API keys secure** - never share or commit them
-- **Use HTTPS** for all API communications
-- **Enable rate limiting** on your deployments
-- **Monitor logs** for suspicious activity
-- **Update regularly** to the latest version
-
-## Known Security Considerations
-
-### API Key Security
-
-- API keys should be stored as environment variables
-- Rotate keys regularly (every 90 days recommended)
-- Use different keys for development and production
-
-### Rate Limiting
-
-- Implement rate limiting to prevent abuse
-- Default: 100 requests per minute per API key
-
-### Data Privacy
-
-- We do not store user trading credentials
-- Market data is aggregated and anonymized
-- Logs are retained for 30 days maximum
-
-### Third-Party Dependencies
-
-We regularly audit dependencies using:
-- `npm audit` for Node.js packages
-- Dependabot for automated security updates
-- Snyk for continuous monitoring
-
-## Security Updates
-
-Security updates are released as:
-- **Critical:** Immediate patch release
-- **High:** Patch within 7 days
-- **Medium:** Included in next minor release
-- **Low:** Included in next major release
-
-Subscribe to our [security mailing list](mailto:security-updates@mycryptosignal.com) for notifications.
-
-## Bug Bounty Program
-
-We are planning to launch a bug bounty program. Check back soon for details.
-
-## Compliance
-
-This project aims to comply with:
-- OWASP Top 10 security standards
-- PCI DSS guidelines (for payment processing)
-- GDPR (for EU users)
+- **No secrets in this repository.** If you find a committed key, token, or credential, report it
+  immediately — do not use it.
+- **The frontend ships no client-side API calls** and no secrets to the browser. The public API
+  key used at build time is a limited, read-only token.
+- **Dependencies** are audited with `npm audit` and Dependabot.
 
 ## Contact
 
-For security concerns: security@mycryptosignal.com
-
-For general questions: support@mycryptosignal.com
-
----
-
-**Last Updated:** January 2026
+- Security: security@mycryptosignal.com
+- General: support@mycryptosignal.com

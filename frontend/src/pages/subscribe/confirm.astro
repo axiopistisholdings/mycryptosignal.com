@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="Subscription confirmed"
+  description="Your MyCryptoSignal email subscription confirmation."
+  path="/subscribe/confirm"
+  noindex
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Email subscription</p>
+      <h1 id="confirm-title">Thanks — you're subscribed</h1>
+      <p id="confirm-body" class="lede muted">
+        Your email address is confirmed. You'll receive the daily market brief.
+      </p>
+      <p class="mt-4">
+        <a class="btn btn-ghost" href="/market">Read today's brief →</a>
+        <a class="btn btn-ghost" href="/">Back to the homepage</a>
+      </p>
+      <p class="attribution mt-4">
+        Every email carries a one-click unsubscribe link. Information, not advice.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // The gateway redirects here with ?s=ok on a valid link, ?s=invalid otherwise.
+  // This page is static, so the outcome is read from the query string.
+  const s = new URLSearchParams(location.search).get('s');
+  const title = document.getElementById('confirm-title');
+  const body = document.getElementById('confirm-body');
+  if (s === 'invalid') {
+    if (title) title.textContent = 'That link didn\'t work';
+    if (body) {
+      body.textContent =
+        'This confirmation link is not recognised — it may have been used already or copied incompletely. Enter your email on the home page to get a fresh link.';
+    }
+  }
+</script>

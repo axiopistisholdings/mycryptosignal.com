@@ -1,0 +1,133 @@
+---
+/**
+ * SponsorUnit — the ONE component permitted to render a paid sponsor placement.
+ *
+ * It renders its `sponsor` (or NOTHING when `null`). It is deliberately a single,
+ * self-contained, clearly-labelled block: it carries its own marker and its own
+ * heading, so a reader always meets the commercial label at the point of contact
+ * — the same "at the point of contact" rule PartnerLink.astro follows for
+ * affiliate links.
+ *
+ * STRUCTURAL SEPARATION: this component emits ONLY the sponsor's own fields. It
+ * cannot contain a signal, a direction word, a coin table or brief data, because
+ * none are passed to it. The page places it in its own <section>, a sibling of
+ * the brief body — never interleaved. A test in __tests__/sponsor.test.ts fails
+ * if a sponsor link ever escapes this block or shares a section with a signal.
+ *
+ * Links carry the mandated commercial rel (see SPONSOR_REL), target="_blank",
+ * and the sponsor's `?from=<slug>` campaign tag so our own analytics can count
+ * arrivals.
+ */
+import {
+  SPONSOR_DISCLOSURE,
+  SPONSOR_LABEL,
+  SPONSOR_MARKER,
+  SPONSOR_REL,
+  SPONSOR_TARGET,
+  sponsorCampaignUrl,
+  type Sponsor,
+} from '../data/sponsors';
+
+interface Props {
+  /** The live sponsor for today, or null. Null renders nothing at all. */
+  sponsor: Sponsor | null;
+}
+
+const { sponsor } = Astro.props;
+const href = sponsor ? sponsorCampaignUrl(sponsor) : '';
+---
+
+{
+  sponsor && (
+    <aside
+      id="sponsor-unit"
+      class="sponsor-unit"
+      data-sponsor-unit="true"
+      data-sponsor={sponsor.slug}
+      aria-labelledby="sponsor-unit-heading"
+    >
+      <h2 id="sponsor-unit-heading" class="sponsor-heading">
+        <span class="sponsor-badge">{SPONSOR_MARKER}</span>
+        <span class="sponsor-heading-text">{SPONSOR_LABEL}</span>
+      </h2>
+      <p class="sponsor-name">
+        <a href={href} target={SPONSOR_TARGET} rel={SPONSOR_REL}>
+          {sponsor.name}
+          <span class="sponsor-arrow" aria-hidden="true">↗</span>
+        </a>
+      </p>
+      {sponsor.blurb && <p class="sponsor-blurb">{sponsor.blurb}</p>}
+      <p class="sponsor-disclosure">{SPONSOR_DISCLOSURE}</p>
+    </aside>
+  )
+}
+
+<style>
+  .sponsor-unit {
+    border: 1px solid var(--rule-strong);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: var(--s5);
+    margin-top: var(--s6);
+  }
+  .sponsor-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 var(--s3);
+    font-size: 0.8125rem;
+  }
+  .sponsor-badge {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tag-ink);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-pill);
+    padding: 1px 0.5rem;
+  }
+  .sponsor-heading-text {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .sponsor-name {
+    margin: 0 0 var(--s2);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1.0625rem;
+  }
+  .sponsor-name a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .sponsor-name a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .sponsor-arrow {
+    font-size: 0.8em;
+    color: var(--muted);
+    margin-left: 0.15em;
+  }
+  .sponsor-blurb {
+    margin: 0 0 var(--s3);
+    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .sponsor-disclosure {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+</style>

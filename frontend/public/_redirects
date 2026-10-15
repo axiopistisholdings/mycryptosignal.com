@@ -1,0 +1,15 @@
+# Cloudflare Pages redirects — 301 legacy MemeChronicle/MyCryptoSignal `.html`
+# paths to the unified clean URLs. The full-host memechronicle.com → mycryptosignal.com
+# 301 is handled by a Cloudflare redirect rule at the DNS/zone level (see README).
+
+/index.html               /                301
+/about.html               /about           301
+/contact.html             /contact         301
+/api-docs.html            /docs            301
+/get-access.html          /get-access      301
+/privacy-policy.html      /privacy         301
+/terms-of-service.html    /terms           301
+/disclaimer.html          /disclaimer      301
+/api.html                 /api             301
+/prices.html              /prices          301
+/news.html                /news            301

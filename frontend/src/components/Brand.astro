@@ -1,0 +1,35 @@
+---
+// The brand lockup, inlined so it inherits the current text colour.
+//
+// Inlined (not an <img>) on purpose: the SVG uses currentColor, so one asset
+// renders correctly in both themes with no invert-filter hack — and because the
+// SAME component is used in the nav and the footer, the wordmark typography can
+// never drift between them again.
+import { readFileSync } from 'node:fs';
+
+interface Props {
+  /** Rendered height in px. */
+  height?: number;
+  /** Symbol only (no wordmark) — for tight spaces. */
+  markOnly?: boolean;
+}
+
+const { height = 26, markOnly = false } = Astro.props;
+const file = markOnly ? 'icon.svg' : 'logo.svg';
+const svg = readFileSync(new URL(`../../public/icons/${file}`, import.meta.url), 'utf8');
+---
+
+<span class="brand-lockup" style={`--brand-h:${height}px`} set:html={svg} />
+
+<style>
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+  }
+  /* The SVG ships with width/height attributes; CSS wins so we size it in one place. */
+  .brand-lockup :global(svg) {
+    display: block;
+    height: var(--brand-h, 26px);
+    width: auto;
+  }
+</style>

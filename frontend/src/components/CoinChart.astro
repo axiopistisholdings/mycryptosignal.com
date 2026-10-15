@@ -1,0 +1,285 @@
+---
+// Interactive price chart for a coin page.
+//
+// The series for THIS coin only ships as a JSON island (~15 KB); the renderer is
+// hand-written SVG in the browser — no chart library, no download. Range toggles
+// re-render from the same embedded series. Honest empty state when a coin has no
+// candles: nothing is drawn and no fake line is invented.
+import type { ChartSeries } from '../lib/chart';
+import { CHART_RANGES } from '../lib/chart';
+
+interface Props {
+  symbol: string;
+  series: ChartSeries;
+  /** True when the coin has a usable series (≥ 2 points). */
+  hasSeries: boolean;
+}
+
+const { symbol, series, hasSeries } = Astro.props;
+const initialRange = '30d' as const;
+const initialPoints = Math.min(CHART_RANGES[initialRange], series.t.length);
+---
+
+{hasSeries ? (
+  <div class="coin-chart" id="coin-chart" data-points={String(initialPoints)} data-range={initialRange}>
+    <div class="chart-head">
+      <div class="tabs chart-ranges" role="tablist" aria-label="Chart range">
+        <button class="tab" type="button" role="tab" data-range="24h" aria-selected="false">24H</button>
+        <button class="tab" type="button" role="tab" data-range="7d" aria-selected="false">7D</button>
+        <button class="tab active" type="button" role="tab" data-range="30d" aria-selected="true">30D</button>
+      </div>
+      <span class="chart-note mono muted" id="chart-note" aria-hidden="true"></span>
+    </div>
+
+    <div
+      class="chart-canvas"
+      id="chart-canvas"
+      tabindex="0"
+      role="img"
+      aria-label={`Price chart for ${symbol}. Focus the chart and use the left and right arrow keys to read any point.`}
+    >
+      <svg class="chart-svg" id="chart-svg" width="100%" height="240" aria-hidden="true" focusable="false"></svg>
+      <div class="chart-tip" id="chart-tip" aria-live="polite"></div>
+    </div>
+    <p class="chart-help muted fs-sm">
+      Hover or tap the chart, or focus it and use <kbd>←</kbd> <kbd>→</kbd> to read the price and time.
+    </p>
+  </div>
+  <script type="application/json" id="chart-data" set:html={JSON.stringify(series)}></script>
+  <script>
+    (function () {
+      const root = document.getElementById('coin-chart') as HTMLElement | null;
+      const svgEl = document.getElementById('chart-svg') as SVGSVGElement | null;
+      const canvas = document.getElementById('chart-canvas') as HTMLElement | null;
+      const tip = document.getElementById('chart-tip') as HTMLElement | null;
+      const note = document.getElementById('chart-note') as HTMLElement | null;
+      const dataEl = document.getElementById('chart-data');
+      if (!root || !svgEl || !canvas || !dataEl) return;
+
+      const series = JSON.parse(dataEl.textContent || '{"t":[],"c":[]}') as { t: number[]; c: number[] };
+      if (!series.t || series.t.length < 2) {
+        // No usable candles — draw nothing (no fabricated line).
+        root.setAttribute('data-points', '0');
+        root.classList.add('coin-chart-empty');
+        if (canvas) canvas.hidden = true;
+        if (note) note.textContent = 'No candles';
+        return;
+      }
+
+      const RANGE = { '24h': 24, '7d': 168, '30d': 720 } as Record<string, number>;
+      const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      const fmtPrice = (v: number): string => {
+        const a = Math.abs(v);
+        if (a >= 1) return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (a >= 0.01) return '$' + v.toFixed(4);
+        return '$' + v.toPrecision(4);
+      };
+      const fmtTime = (ts: number): string => {
+        const d = new Date(ts * 1000);
+        const hh = String(d.getUTCHours()).padStart(2, '0');
+        const mm = String(d.getUTCMinutes()).padStart(2, '0');
+        return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}, ${hh}:${mm} UTC`;
+      };
+
+      let range = '30d';
+      let idx = -1; // -1 = no cursor
+
+      function slice(): { t: number[]; c: number[] } {
+        const n = Math.min(RANGE[range] || series.t.length, series.t.length);
+        const start = series.t.length - n;
+        return { t: series.t.slice(start), c: series.c.slice(start) };
+      }
+
+      const SVGNS = 'http://www.w3.org/2000/svg';
+      let W = 640;
+      let H = 240;
+      const PAD_L = 6;
+      const PAD_R = 6;
+      const PAD_Y = 12;
+
+      let t: number[] = [];
+      let c: number[] = [];
+      let min = 0;
+      let max = 1;
+      let xAt: (i: number) => number = () => PAD_L;
+      let yAt: (v: number) => number = () => H / 2;
+
+      function buildScales(): void {
+        const innerW = Math.max(1, W - PAD_L - PAD_R);
+        const innerH = Math.max(1, H - PAD_Y * 2);
+        min = Infinity;
+        max = -Infinity;
+        for (const v of c) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+        if (!isFinite(min) || !isFinite(max)) {
+          min = 0;
+          max = 1;
+        }
+        const span = max - min || 1;
+        xAt = (i) => PAD_L + (c.length <= 1 ? 0 : (i / (c.length - 1)) * innerW);
+        yAt = (v) => PAD_Y + (1 - (v - min) / span) * innerH;
+      }
+
+      function render(): void {
+        const s = slice();
+        t = s.t;
+        c = s.c;
+        if (idx >= c.length) idx = c.length - 1;
+        buildScales();
+        root!.setAttribute('data-points', String(c.length));
+        root!.setAttribute('data-range', range);
+        if (note) note.textContent = `${c.length} points · ${range.toUpperCase()} · close`;
+
+        const pts: string[] = [];
+        for (let i = 0; i < c.length; i++) pts.push(`${xAt(i).toFixed(2)},${yAt(c[i]!).toFixed(2)}`);
+        const line = pts.join(' ');
+        const area = `${PAD_L},${H - PAD_Y} ${line} ${(W - PAD_R).toFixed(2)},${H - PAD_Y}`;
+        const tone = c.length && c[c.length - 1]! >= c[0]! ? 'rising' : 'falling';
+
+        svgEl!.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        svgEl!.setAttribute('width', String(W));
+        svgEl!.setAttribute('height', String(H));
+        while (svgEl!.firstChild) svgEl!.removeChild(svgEl!.firstChild);
+
+        const mk = (tag: string, attrs: Record<string, string>) => {
+          const el = document.createElementNS(SVGNS, tag);
+          for (const k in attrs) el.setAttribute(k, attrs[k]!);
+          return el;
+        };
+        svgEl!.appendChild(mk('polygon', { class: `chart-area chart-${tone}`, points: area }));
+        svgEl!.appendChild(mk('polyline', { class: `chart-line chart-${tone}`, points: line }));
+
+        const cursor = mk('line', { class: 'chart-cursor', x1: '0', x2: '0', y1: '0', y2: '0' });
+        cursor.setAttribute('visibility', 'hidden');
+        svgEl!.appendChild(cursor);
+        const dot = mk('circle', { class: 'chart-dot', r: '3.5', cx: '0', cy: '0' });
+        dot.setAttribute('visibility', 'hidden');
+        svgEl!.appendChild(dot);
+
+        drawCursor();
+      }
+
+      function drawCursor(): void {
+        const line = svgEl!.querySelector('.chart-cursor') as SVGLineElement | null;
+        const dot = svgEl!.querySelector('.chart-dot') as SVGCircleElement | null;
+        if (idx < 0 || idx >= c.length) {
+          root!.removeAttribute('data-cursor-index');
+          if (line) line.setAttribute('visibility', 'hidden');
+          if (dot) dot.setAttribute('visibility', 'hidden');
+          if (tip) {
+            tip.textContent = '';
+            tip.classList.remove('show');
+          }
+          return;
+        }
+        const x = xAt(idx);
+        const y = yAt(c[idx]!);
+        if (line) {
+          line.setAttribute('x1', x.toFixed(2));
+          line.setAttribute('x2', x.toFixed(2));
+          line.setAttribute('y1', String(PAD_Y));
+          line.setAttribute('y2', String(H - PAD_Y));
+          line.setAttribute('visibility', 'visible');
+        }
+        if (dot) {
+          dot.setAttribute('cx', x.toFixed(2));
+          dot.setAttribute('cy', y.toFixed(2));
+          dot.setAttribute('visibility', 'visible');
+        }
+        const label = `${fmtPrice(c[idx]!)} · ${fmtTime(t[idx]!)}`;
+        root!.setAttribute('data-cursor-index', String(idx));
+        root!.setAttribute('data-cursor-label', label);
+        if (tip) {
+          tip.textContent = label;
+          tip.classList.add('show');
+          tip.style.left = Math.min(Math.max(x, 60), Math.max(60, W - 60)) + 'px';
+        }
+      }
+
+      function measure(): void {
+        const w = Math.max(1, canvas!.clientWidth);
+        const h = Math.max(1, canvas!.clientHeight);
+        if (Math.abs(w - W) < 0.5 && Math.abs(h - H) < 0.5) return;
+        W = w;
+        H = h;
+      }
+
+      function indexFromX(clientX: number): number {
+        const box = svgEl!.getBoundingClientRect();
+        const rel = clientX - box.left;
+        const innerW = Math.max(1, W - PAD_L - PAD_R);
+        const frac = (rel - PAD_L) / innerW;
+        return Math.max(0, Math.min(c.length - 1, Math.round(frac * (c.length - 1))));
+      }
+
+      // Pointer / touch
+      canvas!.addEventListener('pointermove', (e) => {
+        idx = indexFromX(e.clientX);
+        drawCursor();
+      });
+      canvas!.addEventListener('pointerdown', (e) => {
+        idx = indexFromX(e.clientX);
+        drawCursor();
+      });
+      canvas!.addEventListener('pointerleave', () => {
+        idx = -1;
+        drawCursor();
+      });
+
+      // Keyboard cursor
+      canvas!.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+          e.preventDefault();
+          if (idx < 0) idx = c.length - 1;
+          if (e.key === 'ArrowLeft') idx = Math.max(0, idx - 1);
+          else if (e.key === 'ArrowRight') idx = Math.min(c.length - 1, idx + 1);
+          else if (e.key === 'Home') idx = 0;
+          else if (e.key === 'End') idx = c.length - 1;
+          drawCursor();
+        }
+      });
+
+      // Range toggles
+      root!.querySelectorAll<HTMLButtonElement>('.chart-ranges .tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          range = btn.dataset.range || '30d';
+          root!.querySelectorAll('.chart-ranges .tab').forEach((b) => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          idx = -1;
+          measure();
+          render();
+          drawCursor();
+        });
+      });
+
+      if ('ResizeObserver' in window) {
+        const ro = new ResizeObserver(() => {
+          measure();
+          render();
+        });
+        ro.observe(canvas!);
+      } else {
+        window.addEventListener('resize', () => {
+          measure();
+          render();
+        });
+      }
+
+      measure();
+      render();
+    })();
+  </script>
+) : (
+  <div class="coin-chart coin-chart-empty" id="coin-chart" data-points="0">
+    <div class="empty-state">
+      <p class="mono">No candles for {symbol} yet — the collector fills this in on its next pass.</p>
+    </div>
+  </div>
+)}

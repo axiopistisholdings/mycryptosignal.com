@@ -1,0 +1,55 @@
+---
+// Freshness cue — one reusable component for §1 and the tables.
+//
+// The static base is ALWAYS correct: "Data as of HH:MM UTC" from the newest
+// snapshot timestamp. A tiny inline script may upgrade it to a relative phrase
+// ("Updated 12 min ago") computed from the <time datetime> — no network call.
+// We never render a relative phrase server-side: the static site only rebuilds
+// every 30 minutes, so a baked-in "12 min ago" would go stale and look broken.
+interface Props {
+  /** Unix seconds of the newest snapshot row. Rendered only when present. */
+  unix?: number | null;
+  /** Optional override for the label prefix (defaults to "Data as of"). */
+  label?: string;
+}
+
+const { unix = null, label = 'Data as of' } = Astro.props;
+const iso = unix ? new Date(unix * 1000).toISOString() : null;
+const hhmm = iso ? `${iso.slice(11, 16)} UTC` : null;
+---
+
+{iso && hhmm && (
+  <p class="freshness" data-freshness>
+    <span class="pulse" aria-hidden="true"></span>
+    <span class="freshness-text">{label} <time datetime={iso} title={iso}>{hhmm}</time></span>
+  </p>
+)}
+
+<script is:inline>
+  // Progressive enhancement only (guarded so it runs once per page). Recomputes
+  // from the real <time datetime>; if JS is off the absolute time is already right.
+  (function () {
+    var FLAG = '__mcsFreshness';
+    if (window[FLAG]) return;
+    window[FLAG] = 1;
+    try {
+      document.querySelectorAll('[data-freshness]').forEach(function (el) {
+        var t = el.querySelector('time[datetime]');
+        if (!t) return;
+        var iso = t.getAttribute('datetime');
+        var then = new Date(iso).getTime();
+        if (!isFinite(then)) return;
+        var mins = Math.round((Date.now() - then) / 60000);
+        if (mins < 0 || mins >= 1440) return; // too far off — keep the absolute time
+        var rel =
+          mins < 1 ? 'just now' : mins < 60 ? mins + ' min ago' : Math.round(mins / 60) + ' hr ago';
+        var text = el.querySelector('.freshness-text');
+        if (!text) return;
+        text.innerHTML =
+          'Updated <time datetime="' + iso + '" title="' + iso + '">' + rel + '</time>';
+      });
+    } catch (e) {
+      /* leave the absolute time in place */
+    }
+  })();
+</script>

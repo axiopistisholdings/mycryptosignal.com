@@ -1,0 +1,126 @@
+---
+// Shared watchlist runtime — included once, in the layout, on every page.
+//
+// No markup of its own. It reads the star controls and the homepage block that
+// other components render, keeps them in sync with localStorage['mcs-watchlist'],
+// and never touches the network. The list is symbols only; names and the
+// build-time coin icon come from the search index that the command palette ships.
+---
+<script>
+  import { coinIconHtml } from '../lib/coin-icon';
+
+  (function () {
+    const KEY = 'mcs-watchlist';
+    let list: string[] = [];
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          list = parsed.filter((s) => typeof s === 'string').map((s: string) => s.toUpperCase());
+        }
+      }
+    } catch {
+      /* storage unavailable — the watchlist stays in-memory for this session */
+    }
+
+    const esc = (s: string): string =>
+      s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+
+    const names = new Map<string, string>();
+    const files = new Map<string, string>();
+    try {
+      const el = document.getElementById('search-index');
+      if (el) {
+        const idx = JSON.parse(el.textContent || '[]') as { t: string; s: string; k: string; f?: string | null }[];
+        for (const e of idx) {
+          if (e.k === 'coin') {
+            const sym = e.t.toUpperCase();
+            names.set(sym, e.s);
+            // Resolved at build time (png/svg filename); absent → monogram.
+            if (e.f) files.set(sym, e.f);
+          }
+        }
+      }
+    } catch {
+      /* names/icons absent → fall back to the symbol and a monogram */
+    }
+
+    const has = (sym: string): boolean => list.includes(sym);
+
+    function persist(): void {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(list));
+      } catch {
+        /* storage unavailable */
+      }
+    }
+
+    function paintStar(btn: HTMLElement): void {
+      const sym = (btn.dataset.watch || '').toUpperCase();
+      const on = has(sym);
+      const name = names.get(sym) || sym;
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const action = on ? `Remove ${name} from watchlist` : `Add ${name} to watchlist`;
+      btn.setAttribute('aria-label', action);
+      btn.setAttribute('title', action);
+      btn.classList.toggle('is-on', on);
+      const g = btn.querySelector('.watch-glyph');
+      if (g) g.textContent = on ? '★' : '☆';
+    }
+
+    function paintAll(): void {
+      document.querySelectorAll<HTMLElement>('[data-watch]').forEach(paintStar);
+    }
+
+    function renderBlock(): void {
+      const block = document.getElementById('watchlist');
+      const listEl = document.getElementById('watchlist-list');
+      if (!block || !listEl) return;
+      if (!list.length) {
+        block.hidden = true;
+        listEl.innerHTML = '';
+        return;
+      }
+      listEl.innerHTML = [...list]
+        .sort()
+        .map((sym) => {
+          const name = names.get(sym) || sym;
+          const icon = coinIconHtml(files.get(sym) ?? null, sym);
+          return (
+            `<li class="watchlist-item">` +
+            icon +
+            `<a class="mono watchlist-sym" href="/signals/${sym.toLowerCase()}/">${esc(sym)}</a>` +
+            `<span class="muted watchlist-name">${esc(name)}</span>` +
+            `<button class="watch-star is-on" type="button" data-watch="${esc(sym)}" aria-pressed="true" aria-label="Remove ${esc(name)} from watchlist" title="Remove ${esc(name)} from watchlist"><span class="watch-glyph" aria-hidden="true">★</span></button>` +
+            `</li>`
+          );
+        })
+        .join('');
+      block.hidden = false;
+    }
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      const btn = target && target.closest ? (target.closest('[data-watch]') as HTMLElement | null) : null;
+      if (!btn) return;
+      e.preventDefault();
+      const sym = (btn.dataset.watch || '').toUpperCase();
+      if (!sym) return;
+      list = has(sym) ? list.filter((s) => s !== sym) : [...list, sym];
+      persist();
+      paintAll();
+      renderBlock();
+    });
+
+    function init(): void {
+      paintAll();
+      renderBlock();
+    }
+    // Tables that re-render their rows (category filters) call this to repaint
+    // the freshly created star controls.
+    (window as unknown as { __mcsWatchPaint?: () => void }).__mcsWatchPaint = paintAll;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+</script>

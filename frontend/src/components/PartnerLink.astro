@@ -1,0 +1,96 @@
+---
+// The ONLY component permitted to render a commercial/affiliate link.
+//
+// It reads a typed `Partner` from `data/partners.ts` (the single source of
+// truth) and is the only place that emits the `rel="sponsored nofollow
+// noopener"` / `target="_blank"` attributes and the FTC per-link disclosure.
+// Because those are centralised here, they cannot drift between links.
+//
+// It MUST be used only on `/tools-and-partners/` — never on a signal, brief,
+// news or market surface (enforced by scripts/check-commercial-firewall.ts).
+import { assertPartnerDisclosure, disclosureFor, relFor } from '../lib/partners';
+import type { Partner } from '../data/partners';
+
+interface Props {
+  partner: Partner;
+}
+
+const { partner } = Astro.props;
+
+// Hard refusal: a compensated link with no disclosure text must never render.
+assertPartnerDisclosure(partner);
+
+const disclosure = disclosureFor(partner);
+const rel = relFor(partner);
+const target = '_blank';
+---
+
+<li class="partner">
+  <a class="partner-link" href={partner.url} target={target} rel={rel}>
+    {partner.name}
+    <span class="partner-arrow" aria-hidden="true">↗</span>
+  </a>
+  <p class="partner-desc">{partner.description}</p>
+  {
+    partner.compensated && (
+      <p class="partner-disclosure">
+        <span class="partner-disclosure-tag">Affiliate</span> {disclosure}
+      </p>
+    )
+  }
+</li>
+
+<style>
+  .partner {
+    list-style: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    padding: var(--s5);
+    box-shadow: var(--shadow-sm);
+  }
+  .partner-link {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .partner-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .partner-arrow {
+    font-size: 0.8em;
+    color: var(--muted);
+    margin-left: 0.15em;
+  }
+  .partner-desc {
+    margin: var(--s2) 0 0;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .partner-disclosure {
+    margin: var(--s3) 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .partner-disclosure-tag {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tag-ink);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-pill);
+    padding: 1px 0.5rem;
+    margin-right: 0.35em;
+  }
+</style>

@@ -1,0 +1,178 @@
+---
+// /sponsors/ — the rate card. A real, honest page a prospective advertiser can
+// be sent to. It describes ONLY the inventory that exists today and quotes no
+// audience number until we can measure one (see data/audience.ts). It is
+// link-clean: no sponsor host appears here, so a sponsor link can never leak and
+// nothing on this page mixes a commercial link with editorial content.
+//
+// Tone and rules match /tools-and-partners/ and /disclosure/ — the same
+// commercial firewall, stated plainly.
+import Base from '../layouts/Base.astro';
+import { SITE, absoluteUrl } from '../lib/site';
+import { AUDIENCE } from '../data/audience';
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Sponsor MyCryptoSignal',
+  url: absoluteUrl('/sponsors'),
+  isPartOf: { '@type': 'WebSite', name: SITE.name, url: absoluteUrl('/') },
+  publisher: { '@type': 'Organization', name: SITE.name, url: absoluteUrl('/') },
+};
+
+// Honest audience text. If nothing has been measured we say so — we never print
+// a made-up figure.
+const measured = AUDIENCE.newsletterSubscribers !== null || AUDIENCE.monthlyVisits !== null;
+const subscriberText =
+  AUDIENCE.newsletterSubscribers === null
+    ? null
+    : AUDIENCE.newsletterSubscribers.toLocaleString('en-US');
+const visitsText =
+  AUDIENCE.monthlyVisits === null ? null : AUDIENCE.monthlyVisits.toLocaleString('en-US');
+
+const enquirySubject = encodeURIComponent('Sponsorship enquiry');
+const enquiryHref = `mailto:${SITE.supportEmail}?subject=${enquirySubject}`;
+---
+
+<Base
+  title="Sponsor MyCryptoSignal"
+  description="Sponsorship at MyCryptoSignal: a clearly-labelled unit on the daily market brief and its email. What we publish, the real numbers, and the rules that keep sponsorship away from our signals."
+  path="/sponsors"
+  jsonLd={[ld]}
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Advertising</p>
+      <h1>Sponsor MyCryptoSignal</h1>
+
+      <div class="money-block">
+        <h2>The short version</h2>
+        <p>
+          You can buy a clearly-labelled placement on our daily market brief and in its email. You
+          <strong>cannot</strong> buy a signal, a direction call, a brief or a news item — the editorial
+          content is never for sale, and a sponsor unit never sits beside a signal. That separation is a
+          rule of this site, not a preference.
+        </p>
+        <p>
+          Every placement carries a visible <strong>Sponsored</strong> marker and a disclosure at the point a
+          reader meets it. If you need it to look like editorial, we are not the right publisher.
+        </p>
+      </div>
+
+      <h2>What we actually publish</h2>
+      <p>
+        This is the whole inventory. We are small and we would rather describe it exactly than inflate it.
+      </p>
+      <ul>
+        <li>
+          <strong>One original market brief per day</strong>, written from our own collected price and
+          market numbers (top movers, market breadth, the numbers behind the move). One placement covers
+          today's brief page and that day's brief email.
+        </li>
+        <li>
+          <strong>One brief email per day</strong> to the subscriber list. It is plain and short: the
+          brief, a link back to the site, and one click to unsubscribe. A sponsor unit appears in its own
+          block, after the brief — never inside it.
+        </li>
+      </ul>
+      <p>
+        We also publish ~60 daily coin signal pages, attributed news digests and a public data API. None of
+        those carry sponsor units — by rule, a sponsor unit only ever appears on the daily brief and its email.
+      </p>
+
+      <h2>The numbers, honestly</h2>
+      {
+        measured ? (
+          <ul>
+            {subscriberText && (
+              <li>
+                <strong>{subscriberText}</strong> active newsletter subscribers.
+              </li>
+            )}
+            {visitsText && (
+              <li>
+                <strong>{visitsText}</strong> visits per month.
+              </li>
+            )}
+            {AUDIENCE.asOf && <li class="muted">Figures as of {AUDIENCE.asOf}.</li>}
+          </ul>
+        ) : (
+          <p>
+            <strong>We are launching.</strong> We do not yet have a measured audience to quote, so we quote
+            no number at all rather than invent one. When there is a real figure it will appear here. If you
+            want to be early, the honest position is: a small, unduplicated, genuinely original daily brief —
+            priced accordingly.
+          </p>
+        )
+      }
+
+      <h2>Placement rules</h2>
+      <ul>
+        <li>
+          <strong>A unit is always labelled.</strong> A reader sees a <strong>Sponsored</strong> / Partner
+          message marker and a one-line disclosure before the link — not buried in a footer.
+        </li>
+        <li>
+          <strong>A unit is never next to a signal.</strong> It lives in its own block on the brief page and
+          its own block in the email. It is never inside a signal, a direction word (Rising, Falling, Steady,
+          Choppy), a coin table, or the brief's data.
+        </li>
+        <li>
+          <strong>Editorial is not for sale.</strong> Sponsorship buys visibility, not coverage, and never a
+          mention inside the brief's text. Our <a href="/editorial-policy">Editorial Policy</a> and
+          <a href="/disclosure">How we make money</a> say the same thing.
+        </li>
+        <li>
+          <strong>One sponsor at a time.</strong> We run one placement across the surface at once, so a
+          reader is never looking at a wall of ads.
+        </li>
+        <li>
+          <strong>No finance promises.</strong> Crypto products only, and nothing we have to disclaim as an
+          offer, a guarantee or investment advice.
+        </li>
+      </ul>
+
+      <h2>What a sponsor gets</h2>
+      <ul>
+        <li>A clearly-labelled unit on the daily brief page and in the daily brief email, for an agreed floor.</li>
+        <li>
+          A campaign tag on every link (<code>?from=your-slug</code>) so arrivals from the placement can be
+          counted by our own first-party, cookieless analytics.
+        </li>
+        <li>
+          On request, a plain report of how many arrivals the placement sent us — the count, nothing more.
+          We do not sell or share reader data, and there is no third-party ad tech on the site.
+        </li>
+      </ul>
+
+      <h2>How to enquire</h2>
+      <p>
+        Email <a href={enquiryHref}>{SITE.supportEmail}</a> with the product, the dates you have in mind, and
+        one honest sentence about it. We will reply with availability and a rate. We do not run a self-serve
+        ad console and we do not use an ad network.
+      </p>
+
+      <p class="attribution">
+        See also <a href="/tools-and-partners">Tools &amp; Partners</a> (our affiliate links) and
+        <a href="/disclosure">How we make money</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .money-block {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface-2);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .money-block h2 {
+    margin-top: 0;
+    font-size: 1.05rem;
+  }
+  .money-block p + p {
+    margin-top: var(--s3);
+  }
+</style>

@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+// Tier limits and prices. Mirrored from packages/core/src/config/pricing.ts — the engine
+// is the source of truth for what is enforced; this table is what we advertise. If you
+// change a number here, change it there too (pinned by __tests__/pricing.test.ts).
+// `cta` is the real checkout (Stripe payment links on the Axiopistis Holdings LC account);
+// after paying, Stripe redirects to /claim/ where the key is shown once.
+const TIERS = [
+  { name: 'Free', price: '$0', rpm: '60', rpd: '1,000', quota: '15,000', note: 'Instant, self-serve; no card', cta: '/get-access', ctaLabel: 'Get a free key' },
+  { name: 'Startup', price: '$19/mo', rpm: '100', rpd: '10,000', quota: '250,000', note: 'Billed monthly', cta: 'https://buy.stripe.com/14AaEW0GO3YFd8m94A3F600', ctaLabel: 'Subscribe' },
+  { name: 'Growth', price: '$79/mo', rpm: '500', rpd: '60,000', quota: '1,500,000', note: 'Webhooks included', cta: 'https://buy.stripe.com/6oU14m61852Jgky3Kg3F601', ctaLabel: 'Subscribe' },
+  { name: 'Enterprise', price: 'Contact', rpm: '2,000', rpd: '1,000,000', quota: 'Unlimited', note: 'Includes a redistribution licence', cta: `mailto:${SITE.supportEmail}?subject=MyCryptoSignal%20Enterprise`, ctaLabel: 'Contact us' },
+];
+
+const apiLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'MyCryptoSignal API',
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Web',
+  url: `${SITE.url}/api`,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
+const curlSample = `curl -s "${SITE.apiBase}/api/signals" \\
+  -H "X-API-Key: mcs_your_key_here"`;
+const jsSample = `const res = await fetch('${SITE.apiBase}/api/signals', {
+  headers: { 'X-API-Key': process.env.MCS_API_KEY }
+});
+const { signals } = await res.json();`;
+const pySample = `import os, requests
+r = requests.get(
+    "${SITE.apiBase}/api/signals",
+    headers={"X-API-Key": os.environ["MCS_API_KEY"]},
+    timeout=10,
+)
+signals = r.json()["signals"]`;
+---
+
+<Base
+  title="API"
+  description="One X-API-Key unlocks attributed news, scheduled market data, and deterministic daily direction signals. Free tier, documented limits, instant self-serve key."
+  path="/api"
+  jsonLd={[apiLd]}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Data API</p>
+      <h1>Crypto signals, prices, and news behind one key.</h1>
+      <p class="lede muted">
+        A stable REST surface with documented rate limits, quotas, and error shapes. Read the
+        <a href="/docs">full reference</a>, then <a href="/get-access">get a free key</a> — issued
+        instantly and shown once.
+      </p>
+      <div class="hero-actions">
+        <a href="/get-access" class="btn btn-primary">Get a free key</a>
+        <a href="/docs" class="btn btn-ghost">API reference</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">What you get</p>
+      <h2 class="mb-4">Endpoints</h2>
+      <div class="grid grid-2">
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/signals</span><p class="card-excerpt">Latest daily direction signals (Rising/Falling/Steady/Choppy). Query: <code>action</code>.</p></div>
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/signals/history</span><p class="card-excerpt">History for one coin. Query: <code>coin_id</code> (required), <code>days</code> (default 30).</p></div>
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/market</span><p class="card-excerpt">Latest market snapshots. Query: <code>symbol?</code>.</p></div>
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/onchain</span><p class="card-excerpt">Latest on-chain snapshots. Query: <code>symbol?</code>.</p></div>
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/prices</span><p class="card-excerpt">Tracked + meme-mover prices. Query: <code>limit?</code>, <code>category?</code>.</p></div>
+        <div class="endpoint"><span class="method">GET</span><span class="path">/api/news</span><p class="card-excerpt">Published news list. Query: <code>category?</code>, <code>limit?</code>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Freshness</p>
+      <h2 class="mb-4">Scheduled, not a live feed</h2>
+      <p class="lede muted">
+        Every call returns the newest stored value — a snapshot with a timestamp, not a live feed. Prices are
+        collected on a ≈30-minute schedule, signals are generated once per day, briefs are written once per
+        day, and news is collected in batches through the day. Read each row's timestamp —
+        <code>updated_at</code>, <code>signal_date</code>, <code>published_at</code> — to see exactly how
+        fresh it is.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Tiers &amp; limits</p>
+      <h2 class="mb-4">Rate limits and quotas</h2>
+      <div class="table-wrap">
+        <table class="tiers">
+          <caption class="visually-hidden">API rate limits and monthly quotas by tier</caption>
+          <thead><tr><th scope="col">Tier</th><th scope="col">Price</th><th scope="col">Req/min</th><th scope="col">Req/day</th><th scope="col">Monthly quota</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            {TIERS.map((t) => (
+              <tr><td class="mono">{t.name}</td><td class="mono" data-label="Price">{t.price}</td><td class="mono" data-label="Req/min">{t.rpm}</td><td class="mono" data-label="Req/day">{t.rpd}</td><td class="mono" data-label="Monthly quota">{t.quota}</td><td class="name-cell" data-label="Notes">{t.note}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="attribution mt-3">
+        Every authenticated response includes <code>X-RateLimit-*</code> and <code>X-Quota-*</code> headers.
+        Every tier exposes the same endpoints &mdash; only the limits differ. Subscriptions are billed monthly
+        and can be cancelled at any time; after checkout your key is issued immediately.
+      </p>
+      <div class="hero-actions mt-4">
+        {TIERS.map((t) => (
+          <a
+            href={t.cta}
+            class={`btn ${t.name === 'Free' ? 'btn-ghost' : 'btn-primary'}`}
+            rel={t.cta.startsWith('http') ? 'noopener noreferrer' : undefined}
+            target={t.cta.startsWith('http') ? '_blank' : undefined}
+          >
+            {t.ctaLabel} &mdash; {t.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Quickstart</p>
+      <h2 class="mb-4">Copy, paste, ship</h2>
+      <h3 class="mt-4 mb-2">cURL</h3>
+      <pre><code>{curlSample}</code></pre>
+      <h3 class="mt-5 mb-2">JavaScript</h3>
+      <pre><code>{jsSample}</code></pre>
+      <h3 class="mt-5 mb-2">Python</h3>
+      <pre><code>{pySample}</code></pre>
+    </div>
+  </section>
+</Base>

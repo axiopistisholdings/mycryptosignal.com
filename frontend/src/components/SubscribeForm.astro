@@ -1,0 +1,110 @@
+---
+/**
+ * Email-list capture form. The site is static, so this posts to the public API
+ * gateway's POST /subscribe (the same host /get-access uses), which forwards to
+ * the engine's subscriber store and sends the double opt-in confirmation.
+ *
+ * Copy is plain and true (HANDOFF §0e): one original market brief a day, from our
+ * own numbers, unsubscribe in every email. No "live"/"real-time" claim anywhere.
+ */
+interface Props {
+  /** Where the signup came from — recorded on the subscriber row (e.g. "home", "brief"). */
+  source: string;
+  /** Optional heading override; the default suits a section block. */
+  heading?: string;
+  compact?: boolean;
+}
+const { source, heading = 'Get the daily market brief by email', compact = false } = Astro.props;
+const inputId = `subscribe-email-${source}`;
+---
+
+<div class:list={['subscribe', compact && 'subscribe-compact']}>
+  {!compact && <h2 class="subscribe-title">{heading}</h2>}
+  <p class="subscribe-lede muted">
+    One original market brief a day, written from our own collected market numbers. Unsubscribe in every email.
+  </p>
+  <form class="subscribe-form" data-subscribe-form data-source={source} novalidate>
+    <div class="form-group subscribe-field">
+      <label class="visually-hidden" for={inputId}>Email address</label>
+      <input
+        type="email"
+        id={inputId}
+        name="email"
+        required
+        autocomplete="email"
+        placeholder="you@example.com"
+        inputmode="email"
+      />
+      <button type="submit" class="btn btn-primary" data-subscribe-submit>Subscribe</button>
+    </div>
+    <p class="form-status hidden" role="status" aria-live="polite" data-subscribe-status></p>
+    <p class="subscribe-fine print muted">
+      We'll email you a link to confirm. Nothing is sent until you confirm. Information, not advice.
+    </p>
+  </form>
+</div>
+
+<script>
+  import { SITE } from '../lib/site';
+
+  const API_BASE = SITE.apiBase.replace(/\/+$/, '');
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-subscribe-form]')) {
+    const status = form.querySelector<HTMLElement>('[data-subscribe-status]');
+    const submit = form.querySelector<HTMLButtonElement>('[data-subscribe-submit]');
+    const source = form.dataset.source || 'site';
+
+    const show = (kind: 'ok' | 'err', message: string) => {
+      if (!status) return;
+      status.className = `form-status ${kind}`;
+      status.textContent = message;
+      status.classList.remove('hidden');
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = String(new FormData(form).get('email') || '').trim();
+      if (!email || !email.includes('@')) {
+        show('err', 'Please enter a valid email address.');
+        return;
+      }
+
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = 'Subscribing…';
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source }),
+        });
+
+        // The endpoint answers the SAME way whether or not the address is already
+        // subscribed — that is deliberate, so show one neutral message on 200.
+        if (res.ok) {
+          form.querySelector<HTMLElement>('.subscribe-field')?.classList.add('hidden');
+          show('ok', 'Almost there — check your inbox for a confirmation link to finish subscribing.');
+          return;
+        }
+        if (res.status === 429) {
+          show('err', 'Too many attempts just now. Please try again a little later.');
+          return;
+        }
+        if (res.status === 400) {
+          show('err', 'That email address looks invalid. Please check it and try again.');
+          return;
+        }
+        show('err', 'Something went wrong. Please try again in a moment.');
+      } catch {
+        show('err', 'Network error. Check your connection and try again.');
+      } finally {
+        if (submit) {
+          submit.disabled = false;
+          submit.textContent = 'Subscribe';
+        }
+      }
+    });
+  }
+</script>

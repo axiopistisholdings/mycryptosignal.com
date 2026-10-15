@@ -1,0 +1,84 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getNews } from '../../lib/api';
+import { articleCards, emptyState, hrefForArticle } from '../../lib/render';
+import { SITE } from '../../lib/site';
+
+const articles = await getNews(undefined, 60);
+
+const CATEGORIES = [
+  { slug: '', label: 'All' },
+  { slug: 'latest', label: 'Latest' },
+  { slug: 'market-movers', label: 'Market Movers' },
+  { slug: 'project-announcements', label: 'Announcements' },
+];
+
+const newsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'MyCryptoSignal — News',
+  url: `${SITE.url}/news`,
+  description: 'Attributed crypto news digests and original daily market briefs from MyCryptoSignal.',
+  isPartOf: { '@type': 'WebSite', name: SITE.name, url: `${SITE.url}/` },
+};
+---
+
+<Base
+  title="News"
+  description="Attributed crypto news digests and original daily market briefs — every digest names and links its source, and every page carries a not-financial-advice notice."
+  path="/news"
+  jsonLd={[newsLd]}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Newsroom</p>
+      <h1>News &amp; market briefs</h1>
+      <p class="lede muted">
+        Attributed digests of crypto news (summary + link to the source) and our own original daily market
+        briefs written from data we collect. <strong>Data, not advice.</strong>
+      </p>
+
+      <div class="tabs mt-5 mb-5" role="tablist" aria-label="News category">
+        {CATEGORIES.map((c) => (
+          <button class:list={['tab', { active: c.slug === '' }]} role="tab" aria-selected={c.slug === '' ? 'true' : 'false'} data-slug={c.slug} data-filter-tab>
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <h2 class="visually-hidden">Latest news &amp; market briefs</h2>
+
+      <div class="grid grid-3" id="news-grid" set:html={articles.length ? articleCards(articles) : ''}></div>
+      <div id="news-empty" class:hidden={articles.length > 0} set:html={articles.length ? '' : emptyState('No articles yet — the desk is between news cycles.')}></div>
+      <p class="attribution mt-4">Data provided by MyCryptoSignal.</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Pure client-side filter over the already-rendered cards (no network).
+  function markActive(slug: string) {
+    document.querySelectorAll<HTMLElement>('[data-filter-tab]').forEach((el) => {
+      const on = (el.dataset.slug || '') === slug;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+
+  function filter(slug: string) {
+    markActive(slug);
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>('#news-grid .card').forEach((card) => {
+      const cat = card.dataset.category || '';
+      const on = !slug || cat === slug;
+      card.style.display = on ? '' : 'none';
+      if (on) shown++;
+    });
+    const empty = document.getElementById('news-empty');
+    if (empty) empty.classList.toggle('hidden', shown > 0);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-filter-tab]').forEach((el) => {
+    el.addEventListener('click', () => filter(el.dataset.slug || ''));
+  });
+</script>

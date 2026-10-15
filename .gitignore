@@ -62,6 +62,7 @@ dist/
 build/
 out/
 .cache/
+.astro/
 
 # Temporary files
 tmp/
@@ -79,8 +80,3 @@ temp/
 *.cert
 secrets.json
 credentials.json
-
-# Package manager files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml

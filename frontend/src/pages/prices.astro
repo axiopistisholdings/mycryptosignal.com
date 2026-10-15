@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPrices } from '../lib/api';
+import { emptyState, priceRows } from '../lib/render';
+import { loadSparkSeries } from '../lib/market';
+import { sparklineSvg } from '../lib/sparkline';
+import { buildHeatmap } from '../lib/heatmap';
+import Heatmap from '../components/Heatmap.astro';
+import Freshness from '../components/Freshness.astro';
+import { formatDateTime, isoUnix } from '../lib/site';
+import { coinIconFile } from '../lib/coin-assets';
+
+const prices = await getPrices(200);
+// Decorative sparklines: last ~24 hourly closes per coin. Concurrent + tolerant;
+// a symbol with no candles yields '' and its cell stays an empty slot.
+const sparks = await loadSparkSeries(prices);
+const rows = prices.map((p) => ({
+  ...p,
+  spark: sparklineSvg(sparks.get(p.symbol.toUpperCase()) ?? []),
+  // Icon resolved at build time (png/svg, or null → monogram) — see lib/coin-icon.ts.
+  iconFile: coinIconFile(p.coin_id),
+}));
+// Squarified heatmap, laid out at build time (area = market cap, colour = 24h).
+const heatmap = buildHeatmap(prices, { width: 1120, height: 480, minSide: 30 });
+// Newest `updated_at` across the rows — the collector's last run. Drives the
+// as-of cue and the cadence line; null (not a placeholder) when we have nothing.
+const latestUpdated = prices.reduce((m, p) => (p.updated_at > m ? p.updated_at : m), 0) || null;
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'MyCryptoSignal — Scheduled Prices',
+  description: 'Latest tracked-coin prices with 24h/7d/30d change and market cap.',
+  creator: { '@type': 'Organization', name: 'MyCryptoSignal', url: 'https://mycryptosignal.com' },
+  license: 'https://mycryptosignal.com/terms',
+};
+---
+
+<Base
+  title="Prices"
+  description="Latest crypto prices for tracked coins and meme movers with 24h, 7d, and 30d change."
+  path="/prices"
+  jsonLd={[datasetLd]}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Market data</p>
+      <h1>Prices</h1>
+      <p class="lede muted">Tracked coins and meme movers, refreshed from the latest collector run.</p>
+
+      <p class="muted fs-sm mono">Prices are collected on a 30-minute schedule, not streamed.{latestUpdated && <Fragment> Last collection: <time datetime={isoUnix(latestUpdated)}>{formatDateTime(latestUpdated)}</time>.</Fragment>}</p>
+      <Freshness unix={latestUpdated} />
+
+      <Heatmap result={heatmap} total={prices.length} box={{ w: 1120, h: 480 }} />
+
+      <div class="controls">
+        <div class="tabs" role="tablist" aria-label="Category">
+          <button class="tab active" data-cat="" aria-selected="true">All</button>
+          <button class="tab" data-cat="major" aria-selected="false">Majors</button>
+          <button class="tab" data-cat="meme" aria-selected="false">Meme movers</button>
+          <button class="tab" data-cat="defi" aria-selected="false">DeFi</button>
+        </div>
+        <span class="mono muted" id="count-label"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="prices">
+          <caption class="visually-hidden">Crypto prices with 24h, 7d, 30d change and market cap</caption>
+          <thead>
+            <tr>
+              <th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Price</th><th scope="col">24H</th><th scope="col">7D</th><th scope="col">30D</th><th scope="col">Market cap</th><th scope="col">Trend</th><th scope="col">Watch</th>
+            </tr>
+          </thead>
+          <tbody id="prices-body" set:html={rows.length ? priceRows(rows) : ''}></tbody>
+        </table>
+      </div>
+      <div id="prices-empty" class:hidden={rows.length > 0} set:html={rows.length ? '' : emptyState('No prices yet — the collector refreshes on a schedule; the table will fill itself in.')}></div>
+
+      <p class="attribution mt-3">
+        Data provided by MyCryptoSignal · not financial advice.
+      </p>
+    </div>
+  </section>
+
+  <script type="application/json" id="prices-data" set:html={JSON.stringify(rows)}></script>
+</Base>
+
+<script>
+  import { emptyState, priceRows } from '../lib/render';
+
+  interface Row {
+    symbol: string;
+    name: string;
+    price: number | null;
+    price_change_24h: number | null;
+    price_change_7d: number | null;
+    price_change_30d: number | null;
+    market_cap: number | null;
+    category: string;
+    spark?: string | null;
+    iconFile?: string | null;
+  }
+
+  const raw = document.getElementById('prices-data')?.textContent ?? '[]';
+  const all: Row[] = JSON.parse(raw);
+  let activeCat = '';
+
+  function apply() {
+    const rows = activeCat ? all.filter((p) => p.category === activeCat) : all;
+    const body = document.getElementById('prices-body');
+    const empty = document.getElementById('prices-empty');
+    const count = document.getElementById('count-label');
+    if (count) count.textContent = `${rows.length} coin${rows.length === 1 ? '' : 's'}`;
+    if (rows.length) {
+      if (body) body.innerHTML = priceRows(rows as never);
+      empty?.classList.add('hidden');
+    } else {
+      if (body) body.innerHTML = '';
+      if (empty) {
+        empty.innerHTML = emptyState(
+          all.length ? 'No coins in this category.' : 'No prices yet — the collector refreshes on a schedule; the table will fill itself in.',
+        );
+        empty.classList.remove('hidden');
+      }
+    }
+    // Re-rendered rows carry fresh (unpressed) star controls — repaint them.
+    (window as unknown as { __mcsWatchPaint?: () => void }).__mcsWatchPaint?.();
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((b) => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      activeCat = btn.dataset.cat || '';
+      apply();
+    });
+  });
+
+  apply();
+</script>

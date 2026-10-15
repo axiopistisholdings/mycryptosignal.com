@@ -1,0 +1,17 @@
+---
+// Homepage "Your watchlist" block.
+//
+// Rendered hidden by default; the shared watchlist runtime reveals it only when
+// localStorage actually holds coins — so when the list is empty the block is
+// absent, not empty. Placed above the snapshot strip.
+---
+<section class="watchlist-block" id="watchlist" hidden aria-labelledby="watchlist-heading">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Saved on this device</p>
+      <h2 id="watchlist-heading" class="subhead">Your watchlist</h2>
+    </div>
+    <a class="more" href="/signals">All signals →</a>
+  </div>
+  <ul class="watchlist-list" id="watchlist-list" aria-label="Coins in your watchlist"></ul>
+</section>

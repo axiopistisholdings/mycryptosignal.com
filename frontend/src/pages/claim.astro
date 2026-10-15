@@ -1,0 +1,121 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+---
+
+<Base
+  title="Your API key"
+  description="Claim the MyCryptoSignal API key tied to your purchase."
+  path="/claim"
+  noindex
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Paid API access</p>
+      <h1>Your API key</h1>
+      <p class="lede muted">Shown once, right after checkout.</p>
+
+      <div id="claim-status" class="form-status" role="status" aria-live="polite">
+        <p>Retrieving your key…</p>
+      </div>
+
+      <div id="claim-key" class="hidden">
+        <p>
+          Here is your API key. It is shown <strong>once</strong> — copy it somewhere safe now. We keep only
+          its SHA-256 hash, never the key itself. Send it as the <code>X-API-Key</code> header.
+        </p>
+        <pre><code id="issued-key"></code></pre>
+        <button type="button" class="btn btn-primary" id="copy-key">Copy key</button>
+      </div>
+
+      <h2>Next steps</h2>
+      <ul>
+        <li>Send the key as the <code>X-API-Key</code> header on every request.</li>
+        <li>Read the <a href="/docs/">API reference</a> and your <a href="/api">tier limits</a>.</li>
+        <li>Keep the key secret — do not commit it or ship it in a browser bundle.</li>
+      </ul>
+
+      <p class="attribution mt-5">
+        Trouble with your key? <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // The public API base for the BROWSER — the Worker gateway, not the build-time
+  // PUBLIC_API_BASE (which is the loopback engine URL used only for the static build).
+  import { SITE } from '../lib/site';
+  const API_BASE = SITE.apiBase.replace(/\/+$/, '');
+
+  const status = document.getElementById('claim-status');
+  const keyBox = document.getElementById('claim-key');
+  const keyEl = document.getElementById('issued-key');
+
+  function show(kind: 'ok' | 'err' | 'muted', html: string) {
+    if (!status) return;
+    status.className = `form-status ${kind}`;
+    status.innerHTML = html;
+  }
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+  }
+
+  const session = new URLSearchParams(location.search).get('session') || '';
+
+  if (!session) {
+    show(
+      'err',
+      'This link is missing its checkout reference. Open the link from your payment confirmation, or contact ' +
+        '<a href="mailto:support@mycryptosignal.com">support@mycryptosignal.com</a>.',
+    );
+  } else {
+    fetch(`${API_BASE}/claim?session=${encodeURIComponent(session)}`, { headers: { accept: 'application/json' } })
+      .then(async (res) => {
+        if (res.ok) {
+          const data = (await res.json().catch(() => null)) as { api_key?: string } | null;
+          if (data?.api_key) {
+            if (keyEl) keyEl.textContent = data.api_key;
+            keyBox?.classList.remove('hidden');
+            show('ok', '<strong>Your key is ready.</strong> Copy it now — this page will not show it again.');
+            const copyBtn = document.getElementById('copy-key');
+            copyBtn?.addEventListener('click', () => {
+              navigator.clipboard?.writeText(data.api_key as string).then(
+                () => {
+                  copyBtn.textContent = 'Copied';
+                },
+                () => {
+                  copyBtn.textContent = 'Select and copy the key above';
+                },
+              );
+            });
+            return;
+          }
+          show('err', 'We could not read your key. Please contact <a href="mailto:support@mycryptosignal.com">support@mycryptosignal.com</a>.');
+          return;
+        }
+        if (res.status === 410) {
+          show(
+            'err',
+            '<strong>This key was already delivered.</strong> For security it is shown only once. If you lost it, ' +
+              'contact <a href="mailto:support@mycryptosignal.com">support@mycryptosignal.com</a> and we will help.',
+          );
+          return;
+        }
+        if (res.status === 404) {
+          show(
+            'err',
+            '<strong>This link is no longer valid.</strong> It may have expired (keys can be claimed for 24 hours ' +
+              'after checkout) or already been used. Contact ' +
+              '<a href="mailto:support@mycryptosignal.com">support@mycryptosignal.com</a> and we will sort it out.',
+          );
+          return;
+        }
+        show('err', 'Something went wrong retrieving your key. Please try again, or contact <a href="mailto:support@mycryptosignal.com">support@mycryptosignal.com</a>.');
+      })
+      .catch(() => {
+        show('err', 'Network error. Check your connection and reload this page.');
+      });
+  }
+</script>

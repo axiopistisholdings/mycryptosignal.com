@@ -1,0 +1,22 @@
+---
+// The one coin-icon component. A thin wrapper around `coinIconHtml` so the markup
+// is identical whether it is emitted here (Astro) or from the shared string helper
+// used by the server-rendered tables, the command palette index and the watchlist.
+//
+// Existence (and format) is resolved at build time from `public/coins/` — so a coin
+// with no icon (e.g. `gram`) renders a monogram tile, never a broken image.
+import { coinIconFile } from '../lib/coin-assets';
+import { coinIconHtml } from '../lib/coin-icon';
+
+interface Props {
+  /** The coin's own id (asset filename stem), e.g. `matic-network`. */
+  coinId?: string | null;
+  /** Ticker symbol — drives the monogram letter when there is no icon. */
+  symbol: string;
+}
+
+const { coinId = '', symbol } = Astro.props;
+const html = coinIconHtml(coinIconFile(coinId), symbol);
+---
+
+<Fragment set:html={html} />

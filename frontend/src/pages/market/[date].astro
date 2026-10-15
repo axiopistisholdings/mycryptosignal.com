@@ -1,0 +1,107 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getDataBriefs, getNewsArticle, type Article } from '../../lib/api';
+import { briefDate, formatDateTimeLong, isoUnix, SITE } from '../../lib/site';
+import Freshness from '../../components/Freshness.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
+import SponsorUnit from '../../components/SponsorUnit.astro';
+import { findActiveSponsor } from '../../data/sponsors';
+
+export async function getStaticPaths() {
+  const briefs = await getDataBriefs(60);
+  const paths = [];
+  for (const b of briefs) {
+    const day = briefDate(b.slug);
+    if (!day) continue;
+    const full = await getNewsArticle(b.slug);
+    const article: Article = full ?? { ...b, body: b.excerpt ?? '' };
+    paths.push({ params: { date: day }, props: { article, day } });
+  }
+  return paths;
+}
+
+const { article, day } = Astro.props as { article: Article; day: string };
+const paragraphs = (article.body || '').split(/\n{2,}/).filter(Boolean);
+const publishedIso = isoUnix(article.published_at);
+const canonical = `${SITE.url}/market/${day}`;
+const heroImage = `${SITE.url}/icons/news-hero.png`;
+
+// The sponsor unit is resolved from TODAY's date, and shown ONLY on today's
+// brief. A live sponsor never attaches itself to an archived brief (which would
+// read as endorsing a past call). No active sponsor ⇒ null ⇒ nothing renders.
+const today = new Date().toISOString().slice(0, 10);
+const sponsor = day === today ? findActiveSponsor(today) : null;
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  url: canonical,
+  headline: article.headline.slice(0, 110),
+  description: article.excerpt ?? article.headline,
+  articleSection: 'Market',
+  inLanguage: SITE.language,
+  datePublished: publishedIso,
+  dateModified: publishedIso,
+  isAccessibleForFree: true,
+  image: [{ '@type': 'ImageObject', url: heroImage, width: 1200, height: 630 }],
+  author: { '@type': 'Organization', name: 'MyCryptoSignal Data Desk', url: `${SITE.url}/editorial-policy` },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    logo: { '@type': 'ImageObject', url: `${SITE.url}/icons/logo-600.png`, width: 600, height: 600 },
+  },
+};
+---
+
+<Base
+  title={article.headline}
+  description={article.excerpt ?? article.headline}
+  path={`/market/${day}`}
+  jsonLd={[articleLd]}
+  ogType="article"
+  ogImage="/icons/news-hero.png"
+>
+  <section class="section">
+    <div class="container">
+      <div class="article-head">
+        <p class="eyebrow">Market brief · {day}</p>
+        <h1>{article.headline}</h1>
+        <p class="updated">
+          <time datetime={publishedIso}>{formatDateTimeLong(article.published_at)}</time>
+          <span class="muted"> · By the <a href="/editorial-policy">MyCryptoSignal Data Desk</a></span>
+          <span class="muted"> · Written from our own collected price data</span>
+        </p>
+        <Freshness unix={article.published_at} label="Brief as of" />
+      </div>
+
+      <div class="prose">
+        {paragraphs.map((p) => <p>{p}</p>)}
+
+        <div class="nfa">
+          <span><strong>Information, not advice.</strong> Figures come from our own collected market data at the timestamp above. Markets move; always check current prices.</span>
+        </div>
+
+        <p class="attribution">
+          <a href="/market">← All market briefs</a> · <a href="/signals">Today's signals</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {
+    sponsor && (
+      <section class="section sponsor-section" aria-labelledby="sponsor-unit-heading" data-sponsor-section>
+        <div class="container">
+          <SponsorUnit sponsor={sponsor} />
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="brief-subscribe">
+    <div class="container">
+      {SITE.subscribe.enabled && <SubscribeForm source="brief" heading="Get this brief by email" />}
+    </div>
+  </section>
+</Base>

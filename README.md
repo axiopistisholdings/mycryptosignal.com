@@ -1,142 +1,103 @@
-<div align="center">
+<p align="center">
+  <img src="assets/mark.svg" width="72" height="72" alt="MyCryptoSignal">
+</p>
 
-<img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/logo.svg" alt="MyCryptoSignal Logo" width="200"/>
+<h1 align="center">MyCryptoSignal</h1>
 
-# MyCryptoSignal
+<p align="center"><strong>Signals, not noise.</strong><br>
+A crypto market-data publication, operated by AI. Original daily briefs, attributed news, one direction per tracked coin, and a free public API.</p>
 
-**AI-Powered Cryptocurrency Trading Signals**
-
-[![Live Platform](https://img.shields.io/badge/Live-mycryptosignal.com-0EA5E9?style=for-the-badge)](https://mycryptosignal.com)
-[![API Documentation](https://img.shields.io/badge/API-Documentation-50C878?style=for-the-badge)](https://mycryptosignal.com/api-docs)
-[![Get Access](https://img.shields.io/badge/Get-API_Access-0EA5E9?style=for-the-badge)](https://mycryptosignal.com/get-access)
-
-[Live Demo](https://mycryptosignal.com) • [API Docs](https://mycryptosignal.com/api-docs) • [Get Access](https://mycryptosignal.com/get-access)
-
-</div>
+<p align="center">
+  <a href="https://mycryptosignal.com"><strong>mycryptosignal.com</strong></a> ·
+  <a href="https://api.mycryptosignal.workers.dev">API</a> ·
+  <a href="https://mycryptosignal.com/docs/">API docs</a> ·
+  <a href="https://mycryptosignal.com/get-access/">Get a free key</a>
+</p>
 
 ---
 
-## About
+## What it is
 
-MyCryptoSignal is a professional-grade cryptocurrency trading signals platform that leverages artificial intelligence to analyze market data and generate actionable trading insights. Our platform delivers real-time signals with global low-latency access powered by edge computing.
+MyCryptoSignal is a **market-data publication**. It writes its own daily market briefs from numbers
+it collects, digests the day's news with attribution, and publishes one direction per tracked coin.
 
-## Key Features
+It is **operated by AI** — not "AI-assisted." The data collection, the writing, the fact-checking,
+the publishing and the site itself run on software, end to end. Human hands are not on the daily
+work.
 
-<div align="center">
+**Data, not advice.** Informational market data, never investment advice.
 
-| <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/ai.svg" width="48"/><br/>**AI-Enhanced Signals** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/bolt.svg" width="48"/><br/>**Real-Time Data** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/chain-and-locked-padlock.svg" width="48"/><br/>**Secure API** |
-|:---:|:---:|:---:|
-| Advanced algorithms analyze market patterns | Updated hourly with fresh insights | Enterprise-grade authentication |
+## What it publishes
 
-| <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/magnifying-glass-data.svg" width="48"/><br/>**Multi-Source Data** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/bullseye.svg" width="48"/><br/>**Precision Targeting** | <img src="mycryptosignal-public/mycryptosignal.com/frontend/assets/icons/signal.svg" width="48"/><br/>**Signal Delivery** |
-|:---:|:---:|:---:|
-| CoinGecko, Alchemy, Infura integration | Focus on high-potential opportunities | API, Web, and Social Media |
+| Surface | Cadence | What it is |
+|---|---|---|
+| **Market briefs** | 1/day | An original brief written from our own collected numbers — a story of the session, not a list |
+| **News digests** | several/day | Attributed summaries with a link to the source. We never rewrite the source's prose |
+| **Signals** | 1/day per coin | One direction per tracked coin: **Rising / Falling / Steady / Choppy** — no "buy", no "sell", no confidence scores |
+| **Prices** | ~30 min | Market data with a real as-of timestamp on every surface |
+| **Social** | 4/day | Recaps on Bluesky, linking back to the site |
 
-</div>
+## The API
 
-## How It Works
-
-1. **Data Collection** - We aggregate market data from multiple trusted sources
-2. **AI Analysis** - Our algorithms identify patterns and trading opportunities
-3. **Signal Generation** - Actionable signals are created with confidence scores
-4. **Delivery** - Signals delivered via API, web dashboard, and social media
-
-## API Access
-
-Get programmatic access to our trading signals:
+A free, public data API — keys are **instant and self-serve**, no approval queue:
 
 ```bash
-curl -H "X-API-Key: your_api_key" \
-  https://api.mycryptosignal.com/api/signals
+curl -H "X-API-Key: mcs_your_key" \
+  https://api.mycryptosignal.workers.dev/api/signals
 ```
 
-**API Features:**
-- RESTful API with JSON responses
-- Rate limiting and usage tracking
-- Comprehensive documentation
-- Multiple endpoints for coins, signals, and market data
+- **Free tier:** 60 req/min · 1,000 req/day · 15,000 req/month
+- **Endpoints:** signals, signal history, market, on-chain, prices, news, health
+- **Paid tiers:** Startup $19/mo, Growth $79/mo, Enterprise by contract
+- **Docs:** https://mycryptosignal.com/docs/ · **Get a key:** https://mycryptosignal.com/get-access/
 
-[View Full API Documentation](https://mycryptosignal.com/api-docs) | [Request API Key](https://mycryptosignal.com/get-access)
+## This repository
 
-## Technology Stack
+This is the **public, brand-facing repo for MyCryptoSignal.** It presents what the site is and
+publishes the **frontend** — the static site you see at mycryptosignal.com — so anyone can read,
+build, and learn from it.
 
-<div align="center">
+It is **not** a build guide for the full platform. The data engine, the API gateway, and the
+operating systems that run the publication are private — they are the product, and they are not
+published here.
 
-| Layer | Technology |
-|:------|:-----------|
-| **Edge Computing** | Cloudflare Workers |
-| **Database** | Cloudflare D1 (SQLite) |
-| **Caching** | Cloudflare KV |
-| **Data Sources** | CoinGecko, Alchemy, Infura |
-| **AI/ML** | Custom algorithms |
-| **Frontend** | Modern HTML/CSS/JavaScript |
+### Frontend
 
-</div>
+The site is an [Astro](https://astro.build) static build. It reads the public API **at build time**
+and ships fully static pages — no client-side API calls, no secrets in the browser.
 
-## Supported Cryptocurrencies
+```bash
+cd frontend
+npm install
+cp .env.example .env   # PUBLIC_API_BASE defaults to the live API
+npm run dev            # local dev
+npm run build          # static build → dist/
+```
 
-Bitcoin (BTC), Ethereum (ETH), Cardano (ADA), Solana (SOL), Polkadot (DOT), Avalanche (AVAX), Chainlink (LINK), Polygon (MATIC), Uniswap (UNI), Litecoin (LTC), and more.
+The frontend is MIT-licensed and safe to reuse. The data behind it (the API) is a separate,
+operated service.
 
-[View All Supported Coins](https://mycryptosignal.com/api/coins)
+## Rules the publication lives by
 
-## Getting Started
+- **Never "live" or "real-time."** Prices are collected on a 30-minute schedule; every data
+  surface shows a real as-of timestamp.
+- **Never advice.** No "buy", "sell", "should", "predict", no confidence percentages. Direction
+  words only.
+- **Never invented numbers.** Every figure in a brief is verified against the collected data
+  before it is published.
+- **Never rewrite the news.** Digests summarize and link out, with attribution.
 
-### For Users
+## Ownership
 
-1. Visit [mycryptosignal.com](https://mycryptosignal.com)
-2. Browse current signals on the dashboard
-3. Sign up for API access if needed
-4. Start making informed trading decisions
+MyCryptoSignal is a brand of **Axiopistis Holdings LC**, a privately held company in Atlanta,
+Georgia.
 
-### For Developers
-
-1. [Request an API key](https://mycryptosignal.com/get-access)
-2. Review the [API documentation](https://mycryptosignal.com/api-docs)
-3. Integrate signals into your trading bot or application
-4. Monitor usage via your dashboard
-
-## Use Cases
-
-- **Automated Trading Bots** - Integrate signals into your trading algorithms
-- **Portfolio Management** - Make data-driven investment decisions
-- **Market Research** - Analyze trends and opportunities
-- **Educational Tools** - Learn about market dynamics and patterns
-
-## Community
-
-We value transparency and community engagement:
-
-- **Open Platform** - Explore our frontend code and documentation
-- **Security First** - Review our [Security Policy](SECURITY.md) for responsible disclosure
-- **Code of Conduct** - Read our [Code of Conduct](CODE_OF_CONDUCT.md)
-
-## Support
-
-Need help or have questions?
-
-<div align="center">
-
-[📧 Email Support](mailto:support@mycryptosignal.com) • [📚 Documentation](https://mycryptosignal.com/api-docs) • [🌐 Website](https://mycryptosignal.com)
-
-</div>
-
-## Disclaimer
-
-⚠️ **Risk Warning**: Cryptocurrency trading carries significant risk. Our signals are for informational purposes only and should not be considered financial advice. Always conduct your own research and never invest more than you can afford to lose.
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+- **Site:** https://mycryptosignal.com
+- **Support:** support@mycryptosignal.com
+- **Editorial policy:** https://mycryptosignal.com/editorial-policy/
+- **How we make money:** https://mycryptosignal.com/disclosure/
 
 ---
 
-<div align="center">
-
-**Built by [Axiopistis Holdings LC](https://axiopistisholdings.com)**
-
-⭐ Star us on GitHub • 🔗 Share with your network
-
-[![GitHub stars](https://img.shields.io/github/stars/axiopistisholdings/mycryptosignal.com?style=social)](https://github.com/axiopistisholdings/mycryptosignal.com)
-[![GitHub forks](https://img.shields.io/github/forks/axiopistisholdings/mycryptosignal.com?style=social)](https://github.com/axiopistisholdings/mycryptosignal.com/fork)
-
-</div>
+<p align="center"><sub>Signals, not noise.<br>
+© Axiopistis Holdings LC. All rights reserved.</sub></p>

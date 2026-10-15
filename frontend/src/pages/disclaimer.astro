@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { NFA_LONG, SITE } from '../lib/site';
+const updated = '2026-10-11';
+---
+
+<Base title="Disclaimer" description={`Not-financial-advice disclaimer for ${SITE.name}.`} path="/disclaimer">
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Legal</p>
+      <h1>Disclaimer</h1>
+      <p class="updated">Last updated: {updated}</p>
+
+      <div class="nfa">
+        <span><strong>Not financial advice.</strong> {NFA_LONG}</span>
+      </div>
+
+      <h2>Informational use only</h2>
+      <p>
+        {SITE.name} publishes aggregated news, market snapshots, and algorithmic signals for informational
+        purposes. Nothing on this site or served by the API constitutes financial, investment, legal, or
+        tax advice, or an offer or solicitation to buy or sell any asset.
+      </p>
+
+      <h2>Signals are not predictions</h2>
+      <p>
+        Signals are produced by deterministic indicators on our own collected price data, and state a
+        direction word — <code>Rising</code>, <code>Falling</code>, <code>Steady</code>, or{' '}
+        <code>Choppy</code> — with the measured reason. They describe what the numbers show. They are not
+        predictions, not probabilities, and not advice.
+      </p>
+
+      <h2>Accuracy and availability</h2>
+      <p>
+        Data is derived from third-party sources and may be delayed, incomplete, or inaccurate. There is no
+        SLA, and features, limits, and coverage may change without notice.
+      </p>
+
+      <h2>Risk</h2>
+      <p>
+        Trading and holding cryptocurrencies involves substantial risk, including total loss. Past
+        performance does not indicate future results. Never invest more than you can afford to lose, and
+        consult a qualified professional before making financial decisions.
+      </p>
+
+      <h2>Attribution</h2>
+      <p>
+        News content is republished with attribution to its source. API users must display “Powered by{' '}
+        {SITE.name}” with a link to {SITE.domain}.
+      </p>
+    </div>
+  </section>
+</Base>

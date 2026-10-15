@@ -1,0 +1,194 @@
+---
+// THE single monetization surface.
+//
+// Every commercial/affiliate link on mycryptosignal.com lives here and nowhere
+// else. Signals, briefs, news and every other page stay link-clean. The firewall
+// is enforced by scripts/check-commercial-firewall.ts against the built output.
+//
+// Links come ONLY from data/partners.ts, rendered ONLY through PartnerLink.astro,
+// so the disclosure text and the rel="sponsored nofollow noopener" attributes
+// cannot drift.
+import Base from '../layouts/Base.astro';
+import PartnerLink from '../components/PartnerLink.astro';
+import { SITE, absoluteUrl } from '../lib/site';
+import {
+  PARTNERS,
+  CATEGORY_ORDER,
+  CATEGORY_LABEL,
+  DISCLOSURE_TEXT,
+  type PartnerCategory,
+} from '../data/partners';
+
+const groups = CATEGORY_ORDER.map((category: PartnerCategory) => ({
+  category,
+  partners: PARTNERS.filter((p) => p.category === category),
+})).filter((g) => g.partners.length > 0);
+
+// The trading/exchange bucket is deliberately last and separated from the rest.
+const lowerRisk = groups.filter((g) => g.category !== 'exchange');
+const exchange = groups.filter((g) => g.category === 'exchange');
+const hasPartners = PARTNERS.length > 0;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Tools & Partners',
+  url: absoluteUrl('/tools-and-partners'),
+  isPartOf: { '@type': 'WebSite', name: SITE.name, url: absoluteUrl('/') },
+  publisher: { '@type': 'Organization', name: SITE.name, url: absoluteUrl('/') },
+};
+---
+
+<Base
+  title="Tools & Partners"
+  description="The one page on MyCryptoSignal with commercial links. Tools we use and may be paid to recommend — clearly labelled, never mixed with our signals or news."
+  path="/tools-and-partners"
+  jsonLd={[ld]}
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">The only page with commercial links</p>
+      <h1>Tools &amp; Partners</h1>
+
+      <div class="money-block">
+        <h2>How this page works, in plain language</h2>
+        <p>
+          <strong>MyCryptoSignal is owned and operated by {SITE.operator}.</strong> This is the
+          <strong>only</strong> page on the site that contains commercial or affiliate links. Some links
+          here are paid: if you sign up through one, we may earn a commission. It never costs you more.
+        </p>
+        <p>
+          Our <strong>signals, direction words and daily briefs receive no commercial input and are never
+          for sale.</strong> No partner can buy, suppress, or influence a signal, a brief, or a news item.
+          That separation is a rule of the site, not a preference.
+        </p>
+      </div>
+
+      <p>
+        What we list are tools we actually use to collect and read market data, or that we think are
+        useful to a reader who already looks at the numbers. Each entry is one honest line about what the
+        product is. Every compensated link carries the same disclosure, right next to it:
+      </p>
+      <p class="disclosure-sample">{DISCLOSURE_TEXT}</p>
+
+      {hasPartners ? (
+        <>
+          <h2>Tools</h2>
+          {lowerRisk.map((group) => (
+            <div class="partner-group">
+              <h3>{CATEGORY_LABEL[group.category]}</h3>
+              <ul class="partner-list">
+                {group.partners.map((partner) => (
+                  <PartnerLink partner={partner} />
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {exchange.length > 0 && (
+            <div class="partner-group exchange-group">
+              <h3>{CATEGORY_LABEL.exchange}</h3>
+              <p class="exchange-note">
+                Kept separate, and listed last, on purpose. A trading venue is the highest-risk product
+                here: it is where money can be lost fastest. Nothing above or below it is a
+                recommendation, and our signals are never a reason to open an account anywhere.
+              </p>
+              <ul class="partner-list">
+                {exchange.flatMap((group) => group.partners).map((partner) => (
+                  <PartnerLink partner={partner} />
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      ) : (
+        <div class="empty-state">
+          <p>
+            <strong>We are not listing any partners yet.</strong>
+          </p>
+          <p class="empty-sub">
+            We only publish a link once it is real, reviewed, and properly disclosed — so this page stays
+            empty until we have something honest to put on it. It will fill in here when that changes.
+          </p>
+        </div>
+      )}
+
+      <h2>How we choose partners</h2>
+      <p>
+        We are not paid to write reviews and we do not rank by commission. An entry has to meet the same
+        criteria whether we are compensated or not:
+      </p>
+      <ul>
+        <li><strong>We have actually used it</strong>, or its data is verifiable from public sources.</li>
+        <li><strong>It does what it says</strong> — no overstated claims, no promises of returns.</li>
+        <li><strong>The terms are readable</strong> and the pricing is public before you sign up.</li>
+        <li><strong>It fits the categories above</strong> — data, tax, wallets, portfolio tracking.</li>
+      </ul>
+      <p>
+        We say that an entry is compensated instead of calling anything "best". A list built on who pays
+        the most is an advertisement, not a recommendation, and we do not publish one. See
+        <a href="/disclosure">How we make money</a> and our
+        <a href="/editorial-policy">Editorial Policy</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .money-block {
+    border: 1px solid var(--rule-strong);
+    background: var(--surface-2);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    padding: var(--s5);
+  }
+  .money-block h2 {
+    margin-top: 0;
+    font-size: 1.05rem;
+  }
+  .money-block p + p {
+    margin-top: var(--s3);
+  }
+  .disclosure-sample {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    border-left: 2px solid var(--rule-strong);
+    padding-left: var(--s4);
+  }
+  .partner-group {
+    margin-top: var(--s6);
+  }
+  .partner-group h3 {
+    margin-bottom: var(--s4);
+  }
+  .partner-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--s4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .partner-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .exchange-group {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--s5);
+  }
+  .exchange-note {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: var(--s4);
+  }
+  .empty-sub {
+    margin-top: var(--s2);
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+</style>

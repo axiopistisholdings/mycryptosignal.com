@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Unsubscribed"
+  description="You have been unsubscribed from MyCryptoSignal email."
+  path="/unsubscribe"
+  noindex
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Email subscription</p>
+      <h1 id="unsub-title">You're unsubscribed</h1>
+      <p id="unsub-body" class="lede muted">
+        You won't receive any more emails from us. No further action is needed.
+      </p>
+      <p class="mt-4">
+        <a class="btn btn-ghost" href="/">Back to the homepage</a>
+      </p>
+      <p class="attribution mt-4">
+        Changed your mind? Subscribe again from the home page — we'll send a fresh confirmation link.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const s = new URLSearchParams(location.search).get('s');
+  const title = document.getElementById('unsub-title');
+  const body = document.getElementById('unsub-body');
+  if (s === 'invalid') {
+    if (title) title.textContent = 'That unsubscribe link didn\'t work';
+    if (body) {
+      body.textContent =
+        'This unsubscribe link is not recognised. If you keep receiving emails you don\'t want, contact support@mycryptosignal.com and we\'ll remove the address.';
+    }
+  }
+</script>

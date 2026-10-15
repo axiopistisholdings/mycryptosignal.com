@@ -1,0 +1,136 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getSignals, SIGNAL_DIRECTIONS } from '../../lib/api';
+import { emptyState, signalRows } from '../../lib/render';
+import { computeBreadth } from '../../lib/market';
+import BreadthMeter from '../../components/BreadthMeter.astro';
+import Freshness from '../../components/Freshness.astro';
+import { coinIconFile } from '../../lib/coin-assets';
+
+const signals = await getSignals();
+// Attach the build-time icon resolution so server render and the client filter
+// re-render produce identical rows — see lib/coin-icon.ts.
+const signalRowData = signals.map((s) => ({
+  ...s,
+  iconFile: coinIconFile(s.coin_id),
+}));
+const latestDate = signals[0]?.signal_date ?? null;
+// The signal day, as a timestamp (UTC midnight). Freshness renders nothing on a
+// bad/absent date rather than a placeholder.
+const latestUnix = latestDate ? Date.parse(`${latestDate}T00:00:00Z`) / 1000 : null;
+const breadth = computeBreadth(signals);
+
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'MyCryptoSignal — Daily Direction Signals',
+  description:
+    'Daily direction signals per tracked coin (Rising, Falling, Steady, Choppy) with the measured reason. Information, not advice.',
+  creator: { '@type': 'Organization', name: 'MyCryptoSignal', url: 'https://mycryptosignal.com' },
+  license: 'https://mycryptosignal.com/terms',
+  isAccessibleForFree: true,
+  temporalCoverage: latestDate ?? undefined,
+};
+---
+
+<Base
+  title="Signals"
+  description="Today's crypto direction signals — Rising, Falling, Steady, or Choppy per tracked coin, with the measured reason. Information, not advice."
+  path="/signals"
+  jsonLd={[datasetLd]}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Daily signals{latestDate ? ` · ${latestDate}` : ''}</p>
+      <h1>Today's signals</h1>
+      <p class="lede muted">
+        One signal per tracked coin per day, from standard indicators on our own collected price data. Each
+        line states the reason. <strong>Information, not advice.</strong>
+      </p>
+
+      <p class="muted fs-sm mono">Signals are generated once per day.{latestDate && <Fragment> Today's run: {latestDate}.</Fragment>}</p>
+      <Freshness unix={latestUnix} label="Signals as of" />
+
+      {breadth.total > 0 && <BreadthMeter breadth={breadth} />}
+
+      <div class="controls">
+        <label class="mono muted" for="action-filter">Direction</label>
+        <select id="action-filter" aria-label="Filter by direction">
+          <option value="">All</option>
+          {SIGNAL_DIRECTIONS.map((d) => <option value={d}>{d}</option>)}
+        </select>
+        <label class="mono muted" for="sort">Sort</label>
+        <select id="sort" aria-label="Sort order">
+          <option value="symbol">Symbol A–Z</option>
+          <option value="direction">Direction</option>
+        </select>
+        <span class="mono muted" id="count-label"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="signals">
+          <caption class="visually-hidden">Daily direction signals per tracked coin</caption>
+          <thead>
+            <tr><th scope="col">Symbol</th><th scope="col">Direction</th><th scope="col">Date</th><th scope="col">Reason</th><th scope="col">Watch</th></tr>
+          </thead>
+          <tbody id="signal-body" set:html={signalRowData.length ? signalRows(signalRowData) : ''}></tbody>
+        </table>
+      </div>
+      <div id="signal-empty" class:hidden={signals.length > 0} set:html={signals.length ? '' : emptyState('No signals yet — the daily run writes them all at once. Check back after it.')}></div>
+      <p class="attribution mt-3">Data provided by MyCryptoSignal. Information, not advice.</p>
+    </div>
+  </section>
+
+  <script type="application/json" id="signals-data" set:html={JSON.stringify(signalRowData)}></script>
+</Base>
+
+<script>
+  import { signalRows, emptyState } from '../../lib/render';
+
+  interface Dir {
+    symbol: string;
+    action: string;
+    signal_date: string;
+    explanation: string;
+    iconFile?: string | null;
+  }
+
+  const $ = (id: string) => document.getElementById(id) as HTMLSelectElement | null;
+
+  const raw = document.getElementById('signals-data')?.textContent ?? '[]';
+  const all: Dir[] = JSON.parse(raw);
+
+  function apply() {
+    const action = $('action-filter')?.value || '';
+    const sort = $('sort')?.value || 'symbol';
+
+    let rows = all.filter((s) => !action || s.action === action);
+    if (sort === 'direction') {
+      rows = [...rows].sort((a, b) => a.action.localeCompare(b.action) || a.symbol.localeCompare(b.symbol));
+    } else {
+      rows = [...rows].sort((a, b) => a.symbol.localeCompare(b.symbol));
+    }
+
+    const body = document.getElementById('signal-body');
+    const empty = document.getElementById('signal-empty');
+    const count = document.getElementById('count-label');
+    if (count) count.textContent = `${rows.length} signal${rows.length === 1 ? '' : 's'}`;
+
+    if (rows.length) {
+      if (body) body.innerHTML = signalRows(rows as never);
+      empty?.classList.add('hidden');
+    } else {
+      if (body) body.innerHTML = '';
+      if (empty) {
+        empty.innerHTML = emptyState(
+          all.length ? 'No signals match this filter.' : 'No signals yet — the daily run writes them all at once. Check back after it.',
+        );
+        empty.classList.remove('hidden');
+      }
+    }
+    (window as unknown as { __mcsWatchPaint?: () => void }).__mcsWatchPaint?.();
+  }
+
+  ['action-filter', 'sort'].forEach((id) => document.getElementById(id)?.addEventListener('change', apply));
+  apply();
+</script>

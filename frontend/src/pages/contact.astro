@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+---
+
+<Base title="Contact" description={`Contact ${SITE.name} support.`} path="/contact">
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Support</p>
+      <h1>Contact</h1>
+      <p class="lede muted">We usually respond within 1–2 business days.</p>
+
+      <h2>Support</h2>
+      <p>
+        Email: <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>
+      </p>
+
+      <h2>API access</h2>
+      <p>
+        Request a free key on the <a href="/get-access">Get Access</a> page. For higher tiers or commercial
+        use, email us with your project details.
+      </p>
+
+      <h2>Report a content issue</h2>
+      <p>
+        If a news item is inaccurate or you believe it infringes your rights, email us with the article URL
+        and specifics.
+      </p>
+
+      <h2>Status</h2>
+      <p>
+        API health: <a href={`${SITE.apiBase}/api/health`} target="_blank" rel="noopener noreferrer">{SITE.apiBase}/api/health</a>
+      </p>
+    </div>
+  </section>
+</Base>

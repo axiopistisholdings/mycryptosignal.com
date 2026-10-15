@@ -1,0 +1,61 @@
+---
+// Market snapshot strip (A1): four stat tiles computed at build from getPrices().
+// Renders nothing when the snapshot is missing — never zeros.
+import Freshness from './Freshness.astro';
+import type { MarketSnapshot } from '../lib/market';
+import { changeClass } from '../lib/render';
+import { formatCompact, formatPct, formatUsd } from '../lib/site';
+
+interface Props {
+  snapshot: MarketSnapshot | null;
+}
+const { snapshot } = Astro.props;
+---
+
+{snapshot && (
+  <div class="snapshot">
+    <div class="hero-data" role="group" aria-label="Today's market snapshot">
+      <div class="stat">
+        <span class="label">Market cap</span>
+        <span class="value">{formatCompact(snapshot.totalMcap)}</span>
+        {snapshot.weightedChange24h !== null && (
+          <span class={`delta ${changeClass(snapshot.weightedChange24h)}`}>
+            {formatPct(snapshot.weightedChange24h)}
+          </span>
+        )}
+      </div>
+
+      {snapshot.btc && (
+        <div class="stat">
+          <span class="label">Bitcoin</span>
+          <span class="value">{formatUsd(snapshot.btc.price)}</span>
+          {typeof snapshot.btc.price_change_24h === 'number' && (
+            <span class={`delta ${changeClass(snapshot.btc.price_change_24h)}`}>
+              {formatPct(snapshot.btc.price_change_24h)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {snapshot.eth && (
+        <div class="stat">
+          <span class="label">Ethereum</span>
+          <span class="value">{formatUsd(snapshot.eth.price)}</span>
+          {typeof snapshot.eth.price_change_24h === 'number' && (
+            <span class={`delta ${changeClass(snapshot.eth.price_change_24h)}`}>
+              {formatPct(snapshot.eth.price_change_24h)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {snapshot.btcDominance !== null && (
+        <div class="stat">
+          <span class="label">BTC dominance</span>
+          <span class="value">{snapshot.btcDominance.toFixed(1)}%</span>
+        </div>
+      )}
+    </div>
+    <Freshness unix={snapshot.updatedAt} />
+  </div>
+)}

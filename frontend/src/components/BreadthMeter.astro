@@ -1,0 +1,39 @@
+---
+// Market breadth meter (A2): one bar split into rising / steady / falling
+// segments from getSignals() counts. Greyscale-safe: the three fills differ in
+// pattern (solid / dotted / striped), not only hue. Legend pairs each word with
+// a ▲ / ▬ / ▼ cue and its count.
+import type { Breadth } from '../lib/market';
+
+interface Props {
+  breadth: Breadth;
+}
+const { breadth } = Astro.props;
+const { rising, steady, falling, total } = breadth;
+
+// A short factual line — the "38 of 55 tracked coins fell" headline, made text.
+const summary =
+  total === 0
+    ? ''
+    : falling >= rising
+      ? `${falling} of ${total} tracked coins fell`
+      : `${rising} of ${total} tracked coins rose`;
+---
+
+<div
+  class="breadth"
+  role="img"
+  aria-label={`Market breadth: ${rising} rising, ${steady} steady, ${falling} falling, of ${total} tracked coins`}
+>
+  <div class="breadth-bar" aria-hidden="true">
+    {rising > 0 && <span class="breadth-seg seg-rising" style={`flex:${rising}`}></span>}
+    {steady > 0 && <span class="breadth-seg seg-steady" style={`flex:${steady}`}></span>}
+    {falling > 0 && <span class="breadth-seg seg-falling" style={`flex:${falling}`}></span>}
+  </div>
+  <ul class="breadth-legend">
+    <li class="legend-rising"><span class="glyph" aria-hidden="true">▲</span> Rising <span class="mono">{rising}</span></li>
+    <li class="legend-steady"><span class="glyph" aria-hidden="true">▬</span> Steady <span class="mono">{steady}</span></li>
+    <li class="legend-falling"><span class="glyph" aria-hidden="true">▼</span> Falling <span class="mono">{falling}</span></li>
+  </ul>
+  {summary && <p class="breadth-summary muted">{summary}.</p>}
+</div>

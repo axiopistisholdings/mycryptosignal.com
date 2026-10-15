@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+const updated = '2026-10-12';
+---
+
+<Base title="Privacy Policy" description={`How ${SITE.name} handles data and privacy.`} path="/privacy">
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Legal</p>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: {updated}</p>
+
+      <p>
+        This policy explains what data {SITE.name} (operated by {SITE.operator}) collects and how it is
+        used. We aim to collect the minimum necessary to run the Service.
+      </p>
+
+      <h2>1. What we collect</h2>
+      <ul>
+        <li><strong>API key issuance:</strong> the email, project, use case, and optional website you submit when getting a key.</li>
+        <li><strong>API usage:</strong> endpoint, method, status, response time, a hashed IP, and user agent, used for rate limiting and abuse prevention.</li>
+        <li><strong>Server logs:</strong> operational logs used to monitor reliability. Secrets and plaintext API keys are never logged.</li>
+      </ul>
+
+      <h2>2. What we do not store</h2>
+      <ul>
+        <li>We never store plaintext API keys — only their SHA-256 hashes.</li>
+        <li>We do not sell personal data.</li>
+        <li>We do not run invasive third-party tracking on the public website.</li>
+      </ul>
+
+      <h2>3. Cookies and website analytics</h2>
+      <p>
+        The public website does not use cookies, and it does not track you across other sites.
+      </p>
+      <p>
+        To understand which pages are read, we run our own first-party, cookieless analytics. When you
+        load a page we record: the page path (with a short campaign tag such as <code>?from=…</code> if
+        one is present), the host of the page you arrived from (for example
+        <code>news.ycombinator.com</code>), a coarse screen-width bucket (e.g. “mobile”, “desktop”),
+        whether the device is a phone, tablet or desktop, and — derived at our edge network, not sent
+        by you — your country, region and network (ASN). We never store your IP address.
+      </p>
+      <p>
+        To count unique visitors we compute a one-way, salted hash from your IP address, browser
+        user-agent, the date and a secret salt; only a truncated hash is stored, never the IP. The salt
+        changes every day and the previous day's salt is discarded, so a visitor cannot be counted or
+        linked across days. We do not sell or share this data.
+      </p>
+      <p>
+        We honour your browser's “Do Not Track” signal and Global Privacy Control: if either is enabled,
+        nothing is sent at all. We use no advertising cookies, no fingerprinting and no third-party
+        analytics or tracking scripts.
+      </p>
+
+      <h2>4. How we use data</h2>
+      <p>
+        Data is used to operate and secure the Service: issuing and managing API keys, enforcing rate
+        limits and quotas, preventing abuse, and improving reliability.
+      </p>
+
+      <h2>5. Retention</h2>
+      <p>
+        Operational logs and usage records are retained for a limited period (typically up to 30 days) and
+        then deleted. Website analytics data is retained for 90 days and then deleted. API key records
+        persist while the key is active.
+      </p>
+
+      <h2>6. Your rights</h2>
+      <p>
+        You may request access to, correction of, or deletion of the personal data associated with your API
+        key by emailing us. We will respond within a reasonable period.
+      </p>
+
+      <h2>7. Contact</h2>
+      <p><a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a></p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,79 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getFullArticles, type Article } from '../../lib/api';
+import { NFA_LONG, SITE, absoluteUrl, formatDateTimeLong, isoUnix } from '../../lib/site';
+
+// Only digests (attributed summaries) live under /news/<slug>. The daily data
+// briefs are published at /market/<YYYY-MM-DD> instead.
+export async function getStaticPaths() {
+  const articles = (await getFullArticles(60)).filter((a) => !/^market-\d{4}-\d{2}-\d{2}$/.test(a.slug));
+  return articles.map((article) => ({ params: { slug: article.slug }, props: { article } }));
+}
+
+const { article } = Astro.props as { article: Article };
+const paragraphs = (article.body || '').split(/\n{2,}/).filter(Boolean);
+const publishedIso = isoUnix(article.published_at);
+const canonical = absoluteUrl(`/news/${article.slug}`);
+const heroImage = `${SITE.url}/icons/news-hero.png`;
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  url: canonical,
+  headline: article.headline.slice(0, 110),
+  description: article.excerpt ?? article.headline,
+  articleSection: article.category ?? 'News',
+  inLanguage: SITE.language,
+  datePublished: publishedIso,
+  dateModified: publishedIso,
+  isAccessibleForFree: true,
+  image: [{ '@type': 'ImageObject', url: heroImage, width: 1200, height: 630 }],
+  author: { '@type': 'Organization', name: `${SITE.name} Editorial`, url: absoluteUrl('/editorial-policy') },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    logo: { '@type': 'ImageObject', url: absoluteUrl('/icons/logo-600.png'), width: 600, height: 600 },
+  },
+};
+---
+
+<Base
+  title={article.headline}
+  description={article.excerpt ?? article.headline}
+  path={`/news/${article.slug}`}
+  jsonLd={[articleLd]}
+  ogType="article"
+  ogImage="/icons/news-hero.png"
+>
+  <section class="section">
+    <div class="container">
+      <div class="article-head">
+        <p class="eyebrow">News digest</p>
+        <h1>{article.headline}</h1>
+        <p class="updated">
+          <time datetime={publishedIso}>{formatDateTimeLong(article.published_at)}</time>
+          <span class="muted"> · By <a href="/editorial-policy">{SITE.name} Editorial</a></span>
+          <span class="muted"> · {article.word_count} words</span>
+          {article.category ? <span class="muted"> · {article.category}</span> : ''}
+        </p>
+      </div>
+
+      <div class="prose">
+        {paragraphs.map((p) => <p>{p}</p>)}
+
+        <p class="attribution">
+          Source:
+          <a href={article.source_url} target="_blank" rel="noopener noreferrer nofollow">{article.source_name}</a>
+          — see our <a href="/editorial-policy">editorial policy</a>.
+        </p>
+
+        <div class="nfa">
+          <span><strong>Not financial advice.</strong> {NFA_LONG}</span>
+        </div>
+
+        <p class="attribution"><a href="/news">← Back to all news</a></p>
+      </div>
+    </div>
+  </section>
+</Base>

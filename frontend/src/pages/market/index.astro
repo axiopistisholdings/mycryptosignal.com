@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getDataBriefs } from '../../lib/api';
+import { absoluteUrl, briefDate } from '../../lib/site';
+import Freshness from '../../components/Freshness.astro';
+
+const briefs = await getDataBriefs(60);
+// The newest brief's own written-at time; the list is sorted newest-first.
+const latestPublished = briefs[0]?.published_at ?? null;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'MyCryptoSignal — Market briefs',
+  url: absoluteUrl('/market'),
+  description:
+    'Original daily crypto market briefs written from MyCryptoSignal\'s own collected price and market data.',
+  isPartOf: { '@type': 'WebSite', name: 'MyCryptoSignal', url: absoluteUrl('/') },
+};
+---
+
+<Base
+  title="Market briefs"
+  description="Original daily crypto market briefs written from our own price and market data — top movers, market recap, and the numbers behind the move."
+  path="/market"
+  jsonLd={[ld]}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">From our own numbers</p>
+      <h1>Market briefs</h1>
+      <p class="lede muted">
+        One brief a day, from the numbers we collect ourselves — prices, moves, market breadth. No
+        rewriting other people's copy. Real timestamps. <strong>Data, not advice.</strong>
+      </p>
+
+      <Freshness unix={latestPublished} />
+
+      <h2 class="visually-hidden">All market briefs</h2>
+
+      {briefs.length ? (
+        <div class="grid grid-3 mt-5">
+          {briefs.map((b) => {
+            const day = briefDate(b.slug) ?? b.slug;
+            return (
+              <article class="card">
+                <div class="card-meta">
+                  <span class="tag">Market brief</span>
+                  <span class="mono muted">{day}</span>
+                </div>
+                <h3 class="card-title"><a href={`/market/${day}/`}>{b.headline}</a></h3>
+                {b.excerpt && <p class="card-excerpt">{b.excerpt}</p>}
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="empty-state"><p class="mono">No briefs yet — the next daily run writes one and this page fills itself in.</p></div>
+      )}
+    </div>
+  </section>
+</Base>

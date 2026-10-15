@@ -1,0 +1,64 @@
+---
+// Top movers (A3): two compact cards — biggest 24h gains / falls, three rows
+// each. Symbol links to its signal page, % carries ▲/▼ plus the sign, and a
+// decorative sparkline (or an empty slot) sits at the end.
+import type { PriceRow } from '../lib/api';
+import { changeClass, hrefForSymbol } from '../lib/render';
+import { sparkSlot } from '../lib/sparkline';
+import { formatPct } from '../lib/site';
+import CoinIcon from './CoinIcon.astro';
+
+interface Props {
+  gains: PriceRow[];
+  falls: PriceRow[];
+  /** symbol (upper) → chronological closes */
+  sparks: Map<string, number[]>;
+}
+const { gains, falls, sparks } = Astro.props;
+---
+
+<div class="grid grid-2 movers-grid">
+  <div class="card movers">
+    <h3 class="card-title">Biggest 24h gains</h3>
+    {gains.length ? (
+      <ul class="movers-list">
+        {gains.map((p) => (
+          <li class="mover">
+            <span class="coin-id">
+              <CoinIcon coinId={p.coin_id} symbol={p.symbol} />
+              <a class="mono mover-sym" href={hrefForSymbol(p.symbol)}>{p.symbol}</a>
+            </span>
+            <span class={`mover-pct mono ${changeClass(p.price_change_24h)}`}>
+              {formatPct(p.price_change_24h)}
+            </span>
+            <Fragment set:html={sparkSlot(sparks.get(p.symbol.toUpperCase()))} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="muted fs-sm">No moves to report.</p>
+    )}
+  </div>
+
+  <div class="card movers">
+    <h3 class="card-title">Biggest 24h falls</h3>
+    {falls.length ? (
+      <ul class="movers-list">
+        {falls.map((p) => (
+          <li class="mover">
+            <span class="coin-id">
+              <CoinIcon coinId={p.coin_id} symbol={p.symbol} />
+              <a class="mono mover-sym" href={hrefForSymbol(p.symbol)}>{p.symbol}</a>
+            </span>
+            <span class={`mover-pct mono ${changeClass(p.price_change_24h)}`}>
+              {formatPct(p.price_change_24h)}
+            </span>
+            <Fragment set:html={sparkSlot(sparks.get(p.symbol.toUpperCase()))} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="muted fs-sm">No moves to report.</p>
+    )}
+  </div>
+</div>

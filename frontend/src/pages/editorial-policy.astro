@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, absoluteUrl } from '../lib/site';
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Editorial Policy',
+  url: absoluteUrl('/editorial-policy'),
+  isPartOf: { '@type': 'WebSite', name: SITE.name, url: absoluteUrl('/') },
+  publisher: { '@type': 'Organization', name: SITE.name, url: absoluteUrl('/') },
+};
+---
+
+<Base
+  title="Editorial Policy"
+  description="How MyCryptoSignal produces its content: original market briefs from our own data, attributed news digests, our AI-assistance disclosure, authorship, corrections, and ownership."
+  path="/editorial-policy"
+  jsonLd={[ld]}
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Standards &amp; transparency</p>
+      <h1>Editorial Policy</h1>
+      <p class="updated">Last updated: 12 October 2026</p>
+
+      <p>
+        MyCryptoSignal is a crypto market-data publication operated by {SITE.operator}. This page explains
+        what we publish, how we produce it, who is responsible, and how we handle corrections. It applies to
+        every article, market brief, digest, and signal on this site.
+      </p>
+
+      <h2>What we publish</h2>
+      <ul>
+        <li>
+          <strong>Market briefs (original).</strong> Short daily reports written <em>only</em> from numbers we
+          collect ourselves — prices, moves, and market breadth. Our own prose about our own data.
+        </li>
+        <li>
+          <strong>News digests (attributed).</strong> A brief summary of a story published elsewhere, in our own
+          words, always naming and linking the original source. We summarise and link; we do not reproduce or
+          rewrite other publishers' articles.
+        </li>
+        <li>
+          <strong>Signals (informational).</strong> A deterministic daily direction word per tracked coin
+          (Rising, Falling, Steady, or Choppy) with the measured reason. Signals describe what the numbers show.
+          They are not predictions and not advice.
+        </li>
+      </ul>
+
+      <h2>How content is produced</h2>
+      <p>
+        Content is produced by an automated, supervised publishing pipeline. We collect market data from
+        public price APIs, compute standard indicators deterministically, and use AI language models to write
+        plain-language summaries of those numbers. Every figure in a brief or signal originates from our
+        collected data at the timestamp shown. Dates and times are genuine and never backdated or artificially
+        refreshed.
+      </p>
+
+      <h2>AI assistance disclosure</h2>
+      <p>
+        We use AI to draft text from structured data. The pipeline is constrained by fixed policy rules
+        (no advice, no predictions, no hype, no invented numbers, mandatory source attribution) and the output
+        is reviewed and operated by a human editor, who is accountable for what is published. We do not use AI
+        to fabricate quotes, sources, or events.
+      </p>
+
+      <h2>Authorship and accountability</h2>
+      <p>
+        Market briefs are published under the <strong>MyCryptoSignal Data Desk</strong>. Digests are published
+        under the <strong>MyCryptoSignal Editorial</strong> desk. {SITE.operator} is the publisher and is
+        accountable for all content. Editorial questions and corrections: <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+      </p>
+
+      <h2>Sources and attribution</h2>
+      <p>
+        Every digest names its source and links directly to the original article. Price and market figures come
+        from our own collection from public exchange and market-data APIs. Where a non-price fact is included,
+        it is attributed to the named source.
+      </p>
+
+      <h2>Corrections</h2>
+      <p>
+        If we publish something inaccurate, we correct it and note the change. To request a correction, email
+        <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> with the article URL and the issue. We
+        aim to respond promptly.
+      </p>
+
+      <h2>Commercial &amp; funding</h2>
+      <p>
+        {SITE.operator} owns and operates MyCryptoSignal. Our revenue comes from affiliate commissions on
+        the <a href="/tools-and-partners">Tools &amp; Partners</a> page, from sponsorships named on that same
+        page, and from paid tiers of our data API. Our signals, direction calls and briefs receive no
+        commercial input and are never for sale.
+      </p>
+      <p>
+        The firewall rule, in one sentence: <strong>every commercial or affiliate link lives only on the
+        Tools &amp; Partners page — never on a signal, brief, news or market page, and never beside a
+        direction word.</strong> Compensated links are labelled at the point of contact and carry
+        <code>rel="sponsored nofollow"</code>. See <a href="/disclosure">How we make money</a>.
+      </p>
+
+      <h2>Independence and funding</h2>
+      <p>
+        {SITE.operator} funds and operates MyCryptoSignal. We do not accept payment to publish, suppress, or
+        alter editorial content, and we do not publish sponsored articles. Commercial products (such as the
+        data API) are disclosed and kept separate from editorial content.
+      </p>
+
+      <h2>Not financial advice</h2>
+      <p>
+        Nothing on this site is financial, investment, legal, or tax advice, and nothing is an offer or
+        solicitation to buy or sell any asset. Crypto markets are volatile and carry significant risk. Do your
+        own research. See our <a href="/disclaimer">Disclaimer</a> and <a href="/terms">Terms of Service</a>.
+      </p>
+    </div>
+  </section>
+</Base>

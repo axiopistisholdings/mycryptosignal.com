@@ -1,0 +1,173 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCandles, getCoins, getPrices, getSignalHistory, getSignals, type PriceRow, type Signal, type SignalHistoryPoint } from '../../lib/api';
+import { SEED_COINS } from '../../data/seed';
+import { emptyState, directionBadge, changeClass } from '../../lib/render';
+import { NFA_SHORT, formatDateTime, formatPct, formatUsd } from '../../lib/site';
+import { buildChartSeries, CHART_LIMIT, EMPTY_SERIES, type ChartSeries } from '../../lib/chart';
+import CoinChart from '../../components/CoinChart.astro';
+import WatchStar from '../../components/WatchStar.astro';
+import Freshness from '../../components/Freshness.astro';
+import CoinIcon from '../../components/CoinIcon.astro';
+
+export async function getStaticPaths() {
+  const [coins, signals, prices] = await Promise.all([getCoins(), getSignals(), getPrices(300)]);
+
+  // Case-insensitive de-dupe across every source that can appear in a /signals link.
+  const bySymbol = new Map<string, { symbol: string; name: string; coinId: string }>();
+  const add = (symbol: string, name: string, coinId: string) => {
+    const key = symbol.toUpperCase();
+    if (!bySymbol.has(key)) bySymbol.set(key, { symbol: key, name, coinId });
+  };
+  for (const c of coins.length ? coins : SEED_COINS) {
+    if (c?.symbol) add(c.symbol, c.name ?? c.symbol.toUpperCase(), c.coin_id);
+  }
+  // Every symbol we publish a price row for also gets a page (e.g. meme movers
+  // such as GRAM/RENDER that are not in getCoins()). /prices links all of them.
+  for (const p of prices) {
+    if (p?.symbol) add(p.symbol, p.name ?? p.symbol.toUpperCase(), p.coin_id ?? '');
+  }
+
+  const priceBySymbol = new Map(prices.map((p) => [p.symbol.toUpperCase(), p]));
+  const signalBySymbol = new Map(signals.map((s) => [s.symbol.toUpperCase(), s]));
+
+  const entries = [...bySymbol.values()];
+  const histories = await Promise.all(
+    entries.map((e) =>
+      e.coinId
+        ? getSignalHistory(e.coinId, 30).catch(() => [] as SignalHistoryPoint[])
+        : Promise.resolve([] as SignalHistoryPoint[]),
+    ),
+  );
+  // The charted coin's own series only (~720 hourly closes ≈ 15 KB). Never all
+  // coins in one page; a coin with no candles yields an empty series.
+  const seriesList = await Promise.all(
+    entries.map(async (e) => (e.coinId ? buildChartSeries(await getCandles(e.coinId, '1h', CHART_LIMIT)) : EMPTY_SERIES)),
+  );
+
+  return entries.map((e, i) => ({
+    params: { symbol: e.symbol.toLowerCase() },
+    props: {
+      symbol: e.symbol,
+      name: e.name,
+      coinId: e.coinId,
+      latest: signalBySymbol.get(e.symbol) ?? null,
+      snapshot: priceBySymbol.get(e.symbol) ?? null,
+      history: histories[i] ?? [],
+      series: seriesList[i] ?? EMPTY_SERIES,
+    },
+  }));
+}
+
+const { symbol, name, coinId, latest, snapshot, history, series } = Astro.props as {
+  symbol: string;
+  name: string;
+  coinId: string;
+  latest: Signal | null;
+  snapshot: PriceRow | null;
+  history: SignalHistoryPoint[];
+  series: ChartSeries;
+};
+
+const hasSeries = series.t.length >= 2;
+
+// As-of cue: the price snapshot's last collector run when we have it, else the
+// signal day. Anything missing renders nothing (never a fabricated timestamp).
+const freshnessUnix =
+  snapshot?.updated_at ?? (latest?.signal_date ? Date.parse(`${latest.signal_date}T00:00:00Z`) / 1000 : null);
+
+const priceLine = (label: string, value: string, cls = '') =>
+  `<p class="mono stat-line ${cls}"><span class="muted">${label}</span><span>${value}</span></p>`;
+
+const snapshotHtml = snapshot
+  ? [
+      priceLine('PRICE', formatUsd(snapshot.price)),
+      priceLine('24H', formatPct(snapshot.price_change_24h), changeClass(snapshot.price_change_24h)),
+      priceLine('7D', formatPct(snapshot.price_change_7d), changeClass(snapshot.price_change_7d)),
+      priceLine('30D', formatPct(snapshot.price_change_30d), changeClass(snapshot.price_change_30d)),
+      priceLine('UPDATED', formatDateTime(snapshot.updated_at)),
+    ].join('')
+  : '';
+
+const historyRows = history
+  .map(
+    (h) =>
+      `<tr><td class="mono muted">${h.signal_date}</td><td data-label="Direction">${directionBadge(h.action)}</td><td class="explain" data-label="Reason">${h.explanation.replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c] as string)}</td></tr>`,
+  )
+  .join('');
+---
+
+<Base
+  title={`${symbol} signal`}
+  description={`Latest daily direction signal for ${name} (${symbol}) — Rising, Falling, Steady, or Choppy — with the measured reason, an interactive price chart and recent history. Information, not advice.`}
+  path={`/signals/${symbol.toLowerCase()}`}
+>
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Coin detail</p>
+      <div class="coin-head">
+        <h1>
+          <span class="coin-id">
+            <CoinIcon coinId={coinId} symbol={symbol} />
+            <span class="mono">{symbol}</span>
+          </span>
+          <span class="muted subhead">{name}</span>
+        </h1>
+        <WatchStar symbol={symbol} label={name} />
+      </div>
+
+      {(latest || snapshot) && (
+        <div class="direction-strip">
+          {latest && <Fragment set:html={directionBadge(latest.action)} />}
+          {snapshot && typeof snapshot.price_change_24h === 'number' && (
+            <span class={`delta mono ${changeClass(snapshot.price_change_24h)}`}>
+              {formatPct(snapshot.price_change_24h)} <span class="muted">24H</span>
+            </span>
+          )}
+          {latest && <p class="direction-reason muted">{latest.explanation}</p>}
+        </div>
+      )}
+
+      <Freshness unix={freshnessUnix} />
+
+      <h2 class="subhead mt-6 mb-3">Price</h2>
+      <CoinChart symbol={symbol} series={series} hasSeries={hasSeries} />
+
+      <div class="grid grid-2 mt-6">
+        <div class="card">
+          <h2 class="subhead mb-3">Latest signal</h2>
+          {latest ? (
+            <div>
+              <p class="mb-2" set:html={`${directionBadge(latest.action)}`}></p>
+              <p class="mono muted fs-sm">signal_date {latest.signal_date}</p>
+              <p class="muted mt-3">{latest.explanation}</p>
+            </div>
+          ) : (
+            <div set:html={emptyState('No signal for this coin yet — the next daily run writes it.')}></div>
+          )}
+        </div>
+        <div class="card">
+          <h2 class="subhead mb-3">Market snapshot</h2>
+          {snapshot ? <div set:html={snapshotHtml}></div> : <div set:html={emptyState('No price snapshot yet — the collector fills this in on its next pass.')}></div>}
+        </div>
+      </div>
+
+      <h2 class="subhead mt-6 mb-3">Signal history</h2>
+      <div class="table-wrap">
+        <table class="signals">
+          <caption class="visually-hidden">{symbol} signal history</caption>
+          <thead>
+            <tr><th scope="col">Date</th><th scope="col">Direction</th><th scope="col">Reason</th></tr>
+          </thead>
+          <tbody set:html={historyRows}></tbody>
+        </table>
+      </div>
+      {!history.length && <div class="mt-3" set:html={emptyState('No history yet — the log fills as daily runs accumulate.')}></div>}
+
+      <div class="nfa mt-5">
+        <span><strong>Information, not advice.</strong> {NFA_SHORT}</span>
+      </div>
+      <p class="attribution mt-3">Data provided by MyCryptoSignal.</p>
+    </div>
+  </section>
+</Base>

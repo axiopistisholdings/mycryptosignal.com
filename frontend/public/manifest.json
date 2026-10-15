@@ -1,0 +1,43 @@
+{
+  "name": "MyCryptoSignal",
+  "short_name": "MyCryptoSignal",
+  "description": "Crypto market data: original daily market briefs, attributed news digests, prices collected on a 30-minute schedule, and one documented API. Data, not advice.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBFAF7",
+  "theme_color": "#FBFAF7",
+  "icons": [
+    {
+      "src": "/icons/favicon-16x16.png?v=6",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/favicon-32x32.png?v=6",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/favicon-48x48.png?v=6",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/apple-touch-icon-120x120.png?v=6",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/apple-touch-icon-152x152.png?v=6",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/apple-touch-icon-180x180.png?v=6",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

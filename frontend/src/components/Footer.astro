@@ -1,0 +1,86 @@
+---
+import { FOOTER_LINKS, NFA_LONG, SITE, ASSET_V } from '../lib/site';
+import Brand from './Brand.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="/" class="brand" aria-label={`${SITE.name} home`}>
+          <Brand height={30} />
+        </a>
+        <p class="brand-blurb">A small market-data desk: original daily briefs, attributed news, prices collected on a 30-minute schedule, and one documented API. We collect our own numbers and keep our voice down.</p>
+        <div class="social-icons">
+          <a href={SITE.bluesky} target="_blank" rel="noopener noreferrer" title="Bluesky">
+            <img src="/icons/bluesky.svg" alt="Bluesky" />
+          </a>
+          <a href={SITE.github} target="_blank" rel="noopener noreferrer" title="GitHub">
+            <img src="/icons/github-mark.svg" alt="GitHub" />
+          </a>
+          <a href={`mailto:${SITE.supportEmail}`} title="Email support">
+            <img src="/icons/email.svg" alt="Email support" />
+          </a>
+        </div>
+      </div>
+      {FOOTER_LINKS.map((col) => (
+        <div>
+          <h2 class="footer-heading">{col.heading}</h2>
+          <ul>
+            {col.links.map((l) => (
+              <li>
+                <a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-disclaimer">
+      <strong>NOT FINANCIAL ADVICE:</strong>
+      <span> {NFA_LONG}</span>
+    </div>
+    <p class="footer-money">
+      Not investment advice. We may earn commissions; see <a href="/disclosure/">Disclosure</a>.
+    </p>
+    <div class="footer-bottom">
+      <span>© {year} {SITE.operator}. All rights reserved.</span>
+      <span class="mono">Signals, not noise.</span>
+    </div>
+
+    {/* Operator badge. Two weights of the same mark (it is drawn in greys, so one file
+        cannot serve both themes): the light-ink one on light, the light-toned one on dark. */}
+    <div class="footer-badge">
+      <a
+        href="https://axiopistisholdings.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="A brand of Axiopistis Holdings LC"
+      >
+        <img
+          class="badge-light"
+          src={`/icons/axiopistis-badge-light.png?v=${ASSET_V}`}
+          width="169"
+          height="32"
+          alt="A brand of Axiopistis Holdings LC"
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="badge-dark"
+          src={`/icons/axiopistis-badge-dark.png?v=${ASSET_V}`}
+          width="169"
+          height="32"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+    </div>
+  </div>
+</footer>

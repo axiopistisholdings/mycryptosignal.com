@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not found" description="The page you were looking for does not exist." path="/404" noindex>
+  <section class="section">
+    <div class="container center">
+      <p class="eyebrow">Error 404</p>
+      <h1 class="mt-2 mb-2">Signal lost.</h1>
+      <p class="muted mx-auto maxw-50 mt-2 mb-5">
+        This page isn't here. Everything else is; try today's signals, the newsroom, or the API docs.
+      </p>
+      <div class="hero-actions justify-center">
+        <a href="/signals" class="btn btn-primary">Signals</a>
+        <a href="/news" class="btn btn-ghost">News</a>
+        <a href="/docs" class="btn btn-ghost">API Docs</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, NFA_SHORT } from '../lib/site';
+import { getDataBriefs, getNews, getPrices, getSignals } from '../lib/api';
+import { articleCards, emptyState, signalRows, hrefForArticle } from '../lib/render';
+import { computeBreadth, computeSnapshot, loadSparkSeries, topMovers } from '../lib/market';
+import MarketSnapshot from '../components/MarketSnapshot.astro';
+import BreadthMeter from '../components/BreadthMeter.astro';
+import TopMovers from '../components/TopMovers.astro';
+import WatchlistBlock from '../components/WatchlistBlock.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
+import { coinIconFile } from '../lib/coin-assets';
+
+const [signals, news, briefs, prices] = await Promise.all([
+  getSignals(),
+  getNews(undefined, 6),
+  getDataBriefs(3),
+  getPrices(200),
+]);
+const topSignals = signals.slice(0, 8).map((s) => ({
+  ...s,
+  // Build-time icon resolution (png/svg, or null → monogram) — see lib/coin-icon.ts.
+  iconFile: coinIconFile(s.coin_id),
+}));
+const latestNews = news.slice(0, 4);
+const latestBrief = briefs[0] ?? null;
+
+const snapshot = computeSnapshot(prices);
+const breadth = computeBreadth(signals);
+const { gains, falls } = topMovers(prices, 3);
+const sparks = await loadSparkSeries([...gains, ...falls]);
+
+const softwareLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'MyCryptoSignal API',
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Web',
+  url: SITE.url,
+  description:
+    'A REST API providing daily crypto direction signals (Rising/Falling/Steady/Choppy), scheduled market data, and attributed news for tracked coins.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title={SITE.name}
+  description={SITE.description}
+  path="/"
+  jsonLd={[softwareLd]}
+>
+  <section class="hero">
+    <div class="container">
+      <p class="tagline">{SITE.tagline}</p>
+      <h1>Crypto market data and honest daily signals — written from our own numbers.</h1>
+      <p class="lede">
+        We collect the prices ourselves, publish one brief a day, attribute every story we digest, and
+        give each tracked coin one direction word — with the reason. No hype. No advice.
+      </p>
+      <div class="hero-actions">
+        <a href="/market" class="btn btn-primary">Read today's brief</a>
+        <a href="/signals" class="btn btn-ghost">View today's signals</a>
+        <a href="/get-access" class="btn btn-ghost">Get a free API key</a>
+      </div>
+      <WatchlistBlock />
+      <MarketSnapshot snapshot={snapshot} />
+      {breadth.total > 0 && <div class="mt-5"><BreadthMeter breadth={breadth} /></div>}
+    </div>
+  </section>
+
+  {gains.length > 0 && (
+    <section class="section" aria-labelledby="movers">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">24-hour tape</p>
+            <h2 id="movers">Top movers</h2>
+          </div>
+          <a class="more" href="/prices">All prices →</a>
+        </div>
+        <TopMovers gains={gains} falls={falls} sparks={sparks} />
+      </div>
+    </section>
+  )}
+
+  {latestBrief && (
+    <section class="section" aria-labelledby="brief">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Today's data brief</p>
+            <h2 id="brief">{latestBrief.headline}</h2>
+          </div>
+          <a class="more" href="/market">All market briefs →</a>
+        </div>
+        {latestBrief.excerpt && <p class="lede muted">{latestBrief.excerpt}</p>}
+        <p class="mt-4">
+          <a class="btn btn-ghost" href={hrefForArticle(latestBrief.slug)}>Read the full brief →</a>
+        </p>
+        <p class="attribution mt-2">Written from our own collected price data. Data, not advice.</p>
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-labelledby="latest-news">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">News, not hype</p>
+          <h2 id="latest-news">Latest news</h2>
+        </div>
+        <a class="more" href="/news">All news →</a>
+      </div>
+      <div class="grid grid-3" id="news-grid" set:html={latestNews.length ? articleCards(latestNews) : ''}></div>
+      <div id="news-empty" class:hidden={latestNews.length > 0} set:html={latestNews.length ? '' : emptyState('No articles yet — the desk is between news cycles.')}></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="today-signals">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Daily signals</p>
+          <h2 id="today-signals">Today's signals</h2>
+        </div>
+        <a class="more" href="/signals">All signals →</a>
+      </div>
+      <div class="table-wrap">
+        <table class="signals">
+          <caption class="visually-hidden">Today's crypto direction signals</caption>
+          <thead>
+            <tr><th scope="col">Symbol</th><th scope="col">Direction</th><th scope="col">Date</th><th scope="col">Reason</th><th scope="col">Watch</th></tr>
+          </thead>
+          <tbody id="signal-body" set:html={topSignals.length ? signalRows(topSignals) : ''}></tbody>
+        </table>
+      </div>
+      <div id="signal-empty" class:hidden={topSignals.length > 0} set:html={topSignals.length ? '' : emptyState('No signals yet — the daily run writes them all at once. Check back after it.')}></div>
+      <p class="attribution mt-3">Data provided by MyCryptoSignal. Information, not advice.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="subscribe">
+    <div class="container">
+      {SITE.subscribe.enabled && <SubscribeForm source="home" />}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="pitch">
+    <div class="container">
+      <p class="eyebrow">Why MyCryptoSignal</p>
+      <h2 id="pitch" class="mb-5">Original content. Real numbers. One key.</h2>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3 class="card-title">Original market briefs</h3>
+          <p class="card-excerpt">
+            One brief a day, written only from the prices and market numbers we collect ourselves. Our words
+            about our numbers — no rewriting other people's copy.
+          </p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Honest signals</h3>
+          <p class="card-excerpt">
+            Exactly one direction word per tracked coin per day — Rising, Falling, Steady, or Choppy — with
+            the measured reason. No "buy", no "sell", no invented confidence score.
+          </p>
+        </div>
+        <div class="card">
+          <h3 class="card-title">One REST API</h3>
+          <p class="card-excerpt">
+            A single <code>X-API-Key</code> unlocks signals, prices, market, and news. Stable response
+            shapes, documented limits, and errors that state plainly what went wrong.
+          </p>
+        </div>
+      </div>
+      <div class="nfa mt-5">
+        <span><strong>Not financial advice.</strong> {NFA_SHORT}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container center">
+      <h2>Build with the API</h2>
+      <p class="muted mx-auto maxw-60 mt-2 mb-5">
+        Get a free API key instantly and pull signals, prices, and news into your dashboard, bot, or research tool.
+      </p>
+      <a href="/get-access" class="btn btn-primary">Get your API key</a>
+    </div>
+  </section>
+</Base>

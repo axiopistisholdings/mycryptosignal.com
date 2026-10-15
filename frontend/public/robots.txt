@@ -1,0 +1,10 @@
+# MyCryptoSignal — crawler policy
+# https://mycryptosignal.com/robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /404
+
+# Sitemaps
+Sitemap: https://mycryptosignal.com/sitemap.xml
+Sitemap: https://mycryptosignal.com/news-sitemap.xml

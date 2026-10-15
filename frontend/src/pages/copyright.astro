@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+const year = new Date().getFullYear();
+---
+
+<Base title="Copyright" description={`Copyright and attribution policy for ${SITE.name}.`} path="/copyright">
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Legal</p>
+      <h1>Copyright &amp; attribution</h1>
+
+      <h2>Site and API</h2>
+      <p>
+        © {year} {SITE.operator}. All rights reserved. The {SITE.name} name, wordmark, site, and API
+        documentation are the property of {SITE.operator}.
+      </p>
+
+      <h2>Aggregated news</h2>
+      <p>
+        News digests summarise third-party reporting in our own words and always link to the original
+        source; we do not reproduce or rewrite the source's article. Our original market briefs are written
+        only from data we collect ourselves. Copyright in the underlying reporting remains with those
+        sources. If you are a rights holder and believe content is used improperly, contact us and we will
+        review or remove it promptly.
+      </p>
+
+      <h2>API attribution requirement</h2>
+      <p>
+        Data served by the API may be used per our <a href="/terms">Terms of Service</a> with mandatory
+        attribution: display “Powered by {SITE.name}” linked to {SITE.domain}. Commercial reuse or
+        redistribution requires a written agreement.
+      </p>
+
+      <h2>DMCA / takedown</h2>
+      <p>
+        Send copyright notices to <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> with the
+        URL, the work concerned, and your contact details.
+      </p>
+    </div>
+  </section>
+</Base>

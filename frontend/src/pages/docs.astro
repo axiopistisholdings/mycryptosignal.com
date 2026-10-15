@@ -1,0 +1,235 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+
+const BASE = `${SITE.apiBase}/api`;
+
+const signalsExample = `{
+  "signals": [
+    {
+      "coin_id": "bitcoin", "symbol": "BTC",
+      "action": "Rising",
+      "explanation": "Rising: BTC shows positive momentum (+1.4%), with a rising trend, volatility at 1.4%.",
+      "signal_date": "2026-10-12", "timestamp": 1760000000
+    }
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const marketExample = `{
+  "data": [
+    {
+      "coin_id": "bitcoin", "symbol": "BTC", "name": "Bitcoin",
+      "timestamp": 1760000000, "price": 68000.12, "market_cap": 1340000000000,
+      "volume_24h": 32000000000, "price_change_24h": 1.4,
+      "price_change_7d": -2.1, "price_change_30d": 8.7
+    }
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const onchainExample = `{
+  "data": [
+    {
+      "coin_id": "ethereum", "symbol": "ETH", "name": "Ethereum",
+      "timestamp": 1760000000, "transaction_count": 1200000,
+      "active_addresses": 480000, "gas_used": 0.62,
+      "block_height": 21000000, "network_utilization": 0.71
+    }
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const historyExample = `{
+  "coin_id": "bitcoin",
+  "history": [
+    { "id": 9012, "timestamp": 1760000000, "signal_date": "2026-10-12",
+      "action": "Rising", "explanation": "…" }
+  ],
+  "count": 7,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const pricesExample = `{
+  "data": [
+    {
+      "coin_id": "dogecoin", "symbol": "DOGE", "name": "Dogecoin",
+      "price": 0.1234, "price_change_24h": -3.2, "price_change_7d": 5.1,
+      "price_change_30d": 12.0, "market_cap": 18000000000,
+      "volume_24h": 900000000, "category": "meme", "updated_at": 1760000000
+    }
+  ],
+  "count": 60,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const newsExample = `{
+  "articles": [
+    {
+      "slug": "solana-network-activity-surges",
+      "headline": "Solana Network Activity Surges",
+      "excerpt": "…", "category": "market-movers",
+      "source_name": "CryptoSlate", "source_url": "https://…",
+      "published_at": 1760000000, "word_count": 210
+    }
+  ],
+  "count": 20,
+  "attribution": "Data provided by MyCryptoSignal"
+}`;
+
+const requestKeyExample = `POST /api/request-key
+{ "email": "you@example.com", "project": "My app", "use_case": "portfolio tracker" }
+
+201 { "ok": true, "api_key": "mcs_…", "tier": "free",
+      "limits": { "requests_per_minute": 60, "requests_per_day": 1000, "monthly_quota": 15000 },
+      "message": "Store this key now — it is shown only once. Send it as the X-API-Key header." }`;
+
+const errorsExample = `{ "error": "<human message>" }
+
+400  bad params
+401  Invalid API key
+404  unknown route or entity
+429  rate limit or monthly quota exceeded
+500  internal error`;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'MyCryptoSignal API Reference',
+  about: 'REST API for crypto direction signals, market, prices, and news.',
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="API Reference"
+  description="Full MyCryptoSignal API reference: authentication, endpoints, query parameters, response shapes, rate limits, quotas, errors, and caching."
+  path="/docs"
+  jsonLd={[ld]}
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">Reference</p>
+      <h1>API reference (v1)</h1>
+      <p class="lede muted">Everything you need to call the MyCryptoSignal data API.</p>
+
+      <h2>Base URL &amp; version</h2>
+      <pre><code>{BASE}</code></pre>
+      <p>
+        Version <code>v1</code>. This is the single canonical host. Paths are unversioned (there is no
+        <code>/v1</code> prefix and no legacy aliasing); the host above is the one that answers every
+        endpoint below.
+      </p>
+
+      <h2>Getting a key</h2>
+      <p>
+        Keys are free and self-serve — no approval, no queue, no email. Submit the
+        <a href="/get-access">key form</a> (a <code>POST</code> to <code>/api/request-key</code> with
+        <code>email</code>, <code>project</code>, and <code>use_case</code>). The key is returned in that
+        response and is shown <strong>once</strong> — store it immediately; only its SHA-256 hash is kept
+        server-side. One key per email per 24 hours (plus a small per-network throttle). The free tier
+        applies from the first call.
+      </p>
+      <pre><code>{requestKeyExample}</code></pre>
+
+      <h2>Authentication</h2>
+      <p>
+        Send your key in the <code>X-API-Key</code> header (also accepted as
+        <code>Authorization: Bearer mcs_…</code>). Every endpoint except <code>/api/health</code> requires a
+        key.
+      </p>
+      <pre><code>X-API-Key: mcs_your_key_here</code></pre>
+      <p>
+        Keys use the <code>mcs_</code> prefix and are stored only as SHA-256 hashes. Plaintext is shown
+        exactly once, at issuance. Missing or invalid key → <strong>401</strong>.
+      </p>
+
+      <h2>Rate limits &amp; quotas</h2>
+      <p>
+        Requests are limited per minute and per day, with a monthly quota. When exceeded, the API returns
+        <strong>429</strong> with a hint to retry (or a quota-exceeded message). Every authenticated
+        response carries:
+      </p>
+      <pre><code>X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+X-Quota-Limit, X-Quota-Remaining, X-Quota-Reset</code></pre>
+
+      <h2>Endpoints</h2>
+
+      <h3><span class="method">GET</span> <span class="path">/api/health</span></h3>
+      <p>Liveness and server time. No auth.</p>
+      <pre><code>{'{ "status": "ok", "ts": 1760000000 }'}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/signals</span></h3>
+      <p>
+        Latest daily direction signals. Query: <code>action</code> (Rising|Falling|Steady|Choppy).
+      </p>
+      <pre><code>{signalsExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/signals/history</span></h3>
+      <p>History for one coin. Query: <code>coin_id</code> (required), <code>days</code> (default 30, max 365).</p>
+      <pre><code>{historyExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/market</span></h3>
+      <p>Latest market snapshots. Query: <code>symbol?</code>.</p>
+      <pre><code>{marketExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/onchain</span></h3>
+      <p>Latest on-chain snapshots. Query: <code>symbol?</code>. Degrades gracefully when a provider is absent.</p>
+      <pre><code>{onchainExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/prices</span></h3>
+      <p>Tracked and meme-mover prices. Query: <code>limit?</code> (1–500, default 100), <code>category?</code>.</p>
+      <pre><code>{pricesExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/news</span></h3>
+      <p>Published news list. Query: <code>category?</code>, <code>limit?</code> (1–100, default 20).</p>
+      <pre><code>{newsExample}</code></pre>
+
+      <h3><span class="method">GET</span> <span class="path">/api/news/[slug]</span></h3>
+      <p>Single published article: <code>{'{ "article": { … }, "attribution": "…" }'}</code>.</p>
+
+      <h2>Errors</h2>
+      <p>All errors share one shape:</p>
+      <pre><code>{errorsExample}</code></pre>
+
+      <h2>Data freshness &amp; cadence</h2>
+      <p>
+        Data is collected and generated on schedules, not streamed. Every call returns the newest stored
+        value — a snapshot with a timestamp, not a live feed. These are the schedules behind each surface:
+      </p>
+      <ul>
+        <li><strong>Prices</strong> — collected on a ≈30-minute schedule. Each row carries its own <code>updated_at</code>.</li>
+        <li><strong>Signals</strong> — generated once per UTC day, for all tracked coins at once. Each row carries <code>signal_date</code>.</li>
+        <li><strong>Market briefs</strong> — written once per day, from our own collected numbers.</li>
+        <li><strong>News</strong> — digests collected in batches through the day; each item carries <code>published_at</code>.</li>
+        <li><strong>Market / on-chain snapshots</strong> — refreshed on the same ≈30-minute schedule as prices.</li>
+      </ul>
+      <p>
+        Read the relevant timestamp field to see exactly how fresh a value is; nothing is guaranteed to be
+        newer than its schedule.
+      </p>
+
+      <h2>Caching</h2>
+      <p>
+        Cache windows match the same schedules (and the API's <code>Cache-Control</code>): market/on-chain
+        30 min, prices 30 min, news 15 min, signals 23 h, coins indefinite. Safe to cache in your client
+        with the same windows.
+      </p>
+
+      <h2>CORS</h2>
+      <pre><code>Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: Content-Type, X-API-Key, Authorization</code></pre>
+
+      <div class="nfa mt-6">
+        <span><strong>Not financial advice.</strong> All data is informational. Attribution is required:
+          display “Powered by MyCryptoSignal” with a link to mycryptosignal.com.</span>
+      </div>
+
+      <p class="mt-5"><a href="/get-access" class="btn btn-primary">Request a free key</a></p>
+    </div>
+  </section>
+</Base>

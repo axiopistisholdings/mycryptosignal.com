@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+---
+
+<Base
+  title="About"
+  description={`About ${SITE.name} — neutral crypto news, signals, and a data API, operated by ${SITE.operator}.`}
+  path="/about"
+>
+  <section class="section">
+    <div class="container prose">
+      <p class="eyebrow">About</p>
+      <h1>Signals, not noise.</h1>
+
+      <p>
+        {SITE.name} is a crypto market-data publication and a documented data API. We publish original daily
+        market briefs written from numbers we collect ourselves, attributed news digests that always name and
+        link their source, and one plain daily direction signal per tracked coin. It is operated by{' '}
+        {SITE.operator}.
+      </p>
+
+      <h2>What we do</h2>
+      <ul>
+        <li><strong>Market briefs:</strong> original prose written only from our own collected price and market data — one per day.</li>
+        <li><strong>News digests:</strong> a short summary of a story published elsewhere, in our own words, always naming and linking the source. We never rewrite or reproduce other publishers' articles.</li>
+        <li><strong>Signals:</strong> deterministic indicators (momentum, trend, volatility) → one direction word per tracked coin per day — <code>Rising</code>, <code>Falling</code>, <code>Steady</code>, or <code>Choppy</code> — with the measured reason. Never "buy", never "sell", never a fake confidence score.</li>
+        <li><strong>API:</strong> one <code>X-API-Key</code> unlocks signals, prices, market, and news.</li>
+      </ul>
+
+      <h2>How it runs</h2>
+      <p>
+        The platform operates itself on schedules and automation, with a human editor accountable for what is
+        published. It runs on our own low-cost infrastructure and aims to stay lean, portable, and cheap to
+        operate. See our <a href="/editorial-policy">editorial policy</a> for how content is produced.
+      </p>
+
+      <h2>Principles</h2>
+      <ul>
+        <li><strong>Neutral, not hyped.</strong> Banned hype words, no CTAs, no price targets.</li>
+        <li><strong>Attributed.</strong> Sources are always linked; API use requires attribution.</li>
+        <li><strong>Machine-readable.</strong> Stable response shapes and documented limits.</li>
+        <li><strong>Not advice.</strong> Informational only, always.</li>
+      </ul>
+
+      <p><a href="/get-access" class="btn btn-primary">Get a free API key</a></p>
+    </div>
+  </section>
+</Base>

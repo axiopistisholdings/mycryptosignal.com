@@ -1,0 +1,147 @@
+---
+import { SITE, ASSET_V, canonicalUrl } from '../lib/site';
+import { getCoins, getPrices } from '../lib/api';
+import { buildSearchIndex } from '../lib/search';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import WatchlistRuntime from '../components/WatchlistRuntime.astro';
+import '../styles/fonts.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path used for <link rel=canonical>, e.g. "/signals". */
+  path: string;
+  /** Extra JSON-LD objects appended to the page. */
+  jsonLd?: Record<string, unknown>[];
+  /** When true, adds <meta name="robots" content="noindex">. */
+  noindex?: boolean;
+  /** Absolute or root-relative social share image. Defaults to the site OG card. */
+  ogImage?: string;
+  /** og:type — "article" for story pages, "website" otherwise. */
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, path, jsonLd = [], noindex = false, ogType = 'website' } = Astro.props;
+const canonical = canonicalUrl(path);
+const fullTitle = title.includes(SITE.name) ? title : `${title} — ${SITE.name}`;
+const ogImage = new URL(Astro.props.ogImage ?? '/icons/og-image.png', SITE.url);
+ogImage.searchParams.set('v', ASSET_V);
+const ogImageHref = ogImage.toString();
+const publisherLogo = `${SITE.url}/icons/logo-600.png?v=${ASSET_V}`;
+
+const baseLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    logo: { '@type': 'ImageObject', url: publisherLogo, width: 600, height: 600 },
+    sameAs: [SITE.twitter],
+  },
+};
+const blocks = [baseLd, ...jsonLd];
+
+// The command palette's static index: every coin + every page, built once.
+const [paletteCoins, palettePrices] = await Promise.all([getCoins(), getPrices(200)]);
+const searchIndex = buildSearchIndex(paletteCoins, palettePrices);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large" />}
+    <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0B0E14" media="(prefers-color-scheme: dark)" />
+
+    <!-- Theme: apply the remembered choice before first paint (no flash, JS-off = light). -->
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('mcs-theme');
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Site ownership verification (Google Search Console / News Publisher Center) -->
+    <meta name="google-site-verification" content={SITE.googleSiteVerification} />
+
+    <!--
+      First-party, cookieless analytics (public/mcs-analytics.js). The endpoint is
+      injected here from the build-time constant so it is never hardcoded in the
+      script. Gated on the single SITE.analytics.enabled flag — when off, the page
+      emits nothing at all. `is:inline` keeps Astro from bundling/relocating it.
+    -->
+    {SITE.analytics.enabled && (
+      <>
+        <script
+          is:inline
+          set:html={`window.__MCS_ANALYTICS__ = ${JSON.stringify({ endpoint: SITE.analytics.endpoint })};`}
+        />
+        <script is:inline src="/mcs-analytics.js" defer></script>
+      </>
+    )}
+
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageHref} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={SITE.twitterHandle} />
+    <meta name="twitter:creator" content={SITE.twitterHandle} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageHref} />
+
+    <!-- Icons (versioned: see ASSET_V in lib/site.ts) -->
+    <link rel="icon" href={`/favicon.ico?v=${ASSET_V}`} sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href={`/icons/favicon-32x32.png?v=${ASSET_V}`} />
+    <link rel="icon" type="image/png" sizes="16x16" href={`/icons/favicon-16x16.png?v=${ASSET_V}`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`/icons/apple-touch-icon-180x180.png?v=${ASSET_V}`} />
+    <link rel="manifest" href={`/manifest.json?v=${ASSET_V}`} />
+
+    <!-- Fonts (self-hosted, subset, metric-matched fallbacks in styles/fonts.css) -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/inter-latin.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/newsreader-latin.woff2" />
+
+    <!-- Discovery -->
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} — News`} href="/feed.xml" />
+    <link rel="alternate" type="application/xml" title={`${SITE.name} — News sitemap`} href="/news-sitemap.xml" />
+
+    <!-- Structured data -->
+    {blocks.map((b) => (
+      <script type="application/ld+json" set:html={JSON.stringify(b)} />
+    ))}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <CommandPalette index={searchIndex} />
+    <WatchlistRuntime />
+  </body>
+</html>

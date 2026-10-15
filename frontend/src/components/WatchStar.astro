@@ -1,0 +1,25 @@
+---
+// A star control that toggles a coin in the browser's watchlist (localStorage).
+// Server-rendered unpressed; the shared watchlist runtime (in the layout) reads
+// storage after paint and sets the real aria-pressed state — no flash, and it
+// works on every coin row, heatmap tile and coin page.
+interface Props {
+  symbol: string;
+  /** Optional label override for tighter contexts (defaults to the symbol). */
+  label?: string;
+}
+const { symbol, label } = Astro.props;
+const sym = symbol.toUpperCase();
+const name = label ?? sym;
+---
+
+<button
+  class="watch-star"
+  type="button"
+  data-watch={sym}
+  aria-pressed="false"
+  aria-label={`Add ${name} to watchlist`}
+  title={`Add ${name} to watchlist`}
+>
+  <span class="watch-glyph" aria-hidden="true">☆</span>
+</button>

@@ -1,0 +1,68 @@
+---
+// Market heatmap — squarified treemap of the priced coins.
+//
+// area = market cap, colour = a discrete 5-step scale on 24h change. Laid out at
+// build time and emitted as plain positioned markup, so it costs no JavaScript.
+// Coins too small to read are omitted (the smallest are dropped until every
+// surviving tile clears a legibility threshold, then the survivors are re-laid
+// out to fill the box exactly).
+import type { HeatmapResult } from '../lib/heatmap';
+import { changeClass } from '../lib/render';
+import { formatCompact, formatPct } from '../lib/site';
+import WatchStar from './WatchStar.astro';
+
+interface Props {
+  result: HeatmapResult;
+  /** Number of priced coins considered. */
+  total: number;
+  /** Reference box used at layout time (for converting to %). */
+  box: { w: number; h: number };
+}
+
+const { result, total, box } = Astro.props;
+const { tiles, omitted } = result;
+
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(4)}%`;
+
+const STEPS: { step: number; label: string }[] = [
+  { step: 0, label: '≤ −5%' },
+  { step: 1, label: '−5% to −1%' },
+  { step: 2, label: '−1% to +1%' },
+  { step: 3, label: '+1% to +5%' },
+  { step: 4, label: '≥ +5%' },
+];
+---
+
+<div class="heatmap">
+  <div class="hm-box" style={`aspect-ratio:${box.w}/${box.h}`} role="group" aria-label="Market heatmap: tile area is market cap, colour is 24-hour direction">
+    {tiles.map((t) => {
+      const minSide = Math.min(t.rect.w, t.rect.h);
+      const label = `${t.name} (${t.symbol}), ${changeClass(t.change) === 'up' ? '▲ rising' : changeClass(t.change) === 'down' ? '▼ falling' : 'steady'} ${formatPct(t.change)}, market cap ${formatCompact(t.marketCap)}`;
+      return (
+        <div
+          class={`hm-tile hm-step-${t.step}`}
+          style={`left:${pct(t.rect.x, box.w)};top:${pct(t.rect.y, box.h)};width:${pct(t.rect.w, box.w)};height:${pct(t.rect.h, box.h)}`}
+          data-symbol={t.symbol}
+        >
+          <a class="hm-link" href={t.href} title={`${t.name} ${formatPct(t.change)} · market cap ${formatCompact(t.marketCap)}`} aria-label={label}>
+            <span class="hm-sym mono">{t.symbol}</span>
+            <span class={`hm-chg mono ${changeClass(t.change)}`}>{formatPct(t.change)}</span>
+          </a>
+          {minSide >= 56 && <WatchStar symbol={t.symbol} label={t.name} />}
+        </div>
+      );
+    })}
+  </div>
+
+  <div class="hm-legend">
+    <span class="muted fs-sm">Area = market cap · colour = 24h direction</span>
+    <ul class="hm-scale" aria-hidden="true">
+      {STEPS.map((s) => (
+        <li class={`hm-key hm-step-${s.step}`}>{s.label}</li>
+      ))}
+    </ul>
+  </div>
+  <p class="muted fs-sm hm-note">
+    Showing the {tiles.length} largest of {total} priced coins by market cap{omitted ? ` (${omitted} too small to read)` : ''}. Each tile links to its coin page.
+  </p>
+</div>
