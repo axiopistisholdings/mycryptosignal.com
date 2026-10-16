@@ -11,7 +11,8 @@ A crypto market-data publication, operated by AI. Original daily briefs, attribu
   <a href="https://mycryptosignal.com"><strong>mycryptosignal.com</strong></a> ·
   <a href="https://api.mycryptosignal.workers.dev">API</a> ·
   <a href="https://mycryptosignal.com/docs/">API docs</a> ·
-  <a href="https://mycryptosignal.com/get-access/">Get a free key</a>
+  <a href="https://mycryptosignal.com/get-access/">Get a free key</a> ·
+  <a href="https://mycryptosignal.com/how-it-is-operated/">How it is operated</a>
 </p>
 
 ---
@@ -19,7 +20,8 @@ A crypto market-data publication, operated by AI. Original daily briefs, attribu
 ## What it is
 
 MyCryptoSignal is a **market-data publication**. It writes its own daily market briefs from numbers
-it collects, digests the day's news with attribution, and publishes one direction per tracked coin.
+it collects, publishes attributed news analyses that add its own market data, and publishes one
+direction per tracked coin.
 
 It is **operated by AI** — not "AI-assisted." The data collection, the writing, the fact-checking,
 the publishing and the site itself run on software, end to end. Human hands are not on the daily
@@ -31,8 +33,8 @@ work.
 
 | Surface | Cadence | What it is |
 |---|---|---|
-| **Market briefs** | 1/day | An original brief written from our own collected numbers — a story of the session, not a list |
-| **News digests** | several/day | Attributed summaries with a link to the source. We never rewrite the source's prose |
+| **Market briefs** | 1/day | An original 700–1,000-word brief written from our own collected numbers — a story of the session, not a list |
+| **News analyses** | up to 4/day | Attributed analysis that adds our own market data for the coins involved; we never rewrite the source's prose, and quiet days publish nothing |
 | **Signals** | 1/day per coin | One direction per tracked coin: **Rising / Falling / Steady / Choppy** — no "buy", no "sell", no confidence scores |
 | **Prices** | ~30 min | Market data with a real as-of timestamp on every surface |
 | **Social** | 4/day | Recaps on Bluesky, linking back to the site |
@@ -83,9 +85,19 @@ operated service.
   surface shows a real as-of timestamp.
 - **Never advice.** No "buy", "sell", "should", "predict", no confidence percentages. Direction
   words only.
-- **Never invented numbers.** Every figure in a brief is verified against the collected data
-  before it is published.
-- **Never rewrite the news.** Digests summarize and link out, with attribution.
+- **Never invented numbers.** Every figure in a brief or analysis is verified against the data it
+  was written from — our collected market numbers, or the source's own words.
+- **Never rewrite the news.** Analyses summarize, credit the source, link out, and add our own
+  market numbers.
+- **Nothing publishes below the bar.** Every article must pass coded checks before publication —
+  length floors, attribution, advice and hype scans, malformed-text checks. A draft that fails is
+  retried with the failure fed back, then dropped. There is no fallback that publishes a stub.
+- **The system watches itself.** Health checks run every 15 minutes and email when something
+  breaks; a daily operations email reports the whole state; an external watchdog on a separate
+  machine notices if the publication goes silent. No one has to remember to look.
+
+The full, plain-English version is at
+**[How this publication is operated by AI →](https://mycryptosignal.com/how-it-is-operated/)**
 
 ## Ownership
 
@@ -93,6 +105,7 @@ MyCryptoSignal is a brand of **Axiopistis Holdings LC**, a privately held compan
 Georgia.
 
 - **Site:** https://mycryptosignal.com
+- **How it is operated (the full design):** https://mycryptosignal.com/how-it-is-operated/
 - **Support:** support@mycryptosignal.com
 - **Editorial policy:** https://mycryptosignal.com/editorial-policy/
 - **How we make money:** https://mycryptosignal.com/disclosure/
